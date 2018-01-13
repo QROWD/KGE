@@ -7,5 +7,4 @@ logger.propagate = False
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-
 logger.addHandler(ch)
