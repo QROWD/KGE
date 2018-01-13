@@ -28,10 +28,8 @@ if __name__ == "__main__":
     help='Number of examples in the batch sample (default: 500)')
   parser.add_argument('--negative', type=int, default=10, metavar='', 
     help='Number of negative examples generated (default: 10)')
-  parser.add_argument('--valid', type=int, default=1000, metavar='', 
-    help='whether to use `l1` or `l2` metric for TransE (default: l2)')
   parser.add_argument('--rand', default=1234, type=int, metavar='',
-    help='define random seed (default: 1234')
+    help='Set the random seed (default: 1234')
 
   args = parser.parse_args()
 
@@ -41,8 +39,7 @@ if __name__ == "__main__":
   data, train, valid, test, entities, relations = load(path, args.data + ".txt")
 
   param = Parameters(args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
-    epoch=args.epoch, bsize=args.bsize, negative=args.negative, 
-    valid=args.valid)
+    epoch=args.epoch, bsize=args.bsize, negative=args.negative)
 
   model = Experiment(data, train, valid, test, entities, relations, param)
 

@@ -58,20 +58,11 @@ class Model(object):
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
-  def reset(self):
-    params = self.tensors()
-    for name, val in params.items():
-      setattr(self, name).set_value(val, borrow=True)
-
   def setup(self,train, valid, param):
 
-    if self.loss_to_opt == None:
-      self.allocate()
-      self.define_loss()
-      self.pred_func_compiled = theano.function(self.get_pred_symb_vars(), self.pred_func)
-    else:
-      self.reset()
-
+    self.allocate()
+    self.define_loss()
+    self.pred_func_compiled = theano.function(self.get_pred_symb_vars(), self.pred_func)
     self.loss_to_opt = self.loss + param.lmbda * self.regul_func
 
 
@@ -96,21 +87,6 @@ class Model(object):
       patience=9999999,
       max_gradient_norm=1,
       learning_rate=param.lr):
-
-      if it % param.valid_scores == 0 and scorer != None:
-        logger.info("Validation metrics:")
-        res = scorer.compute(self, valid)
-        cv_res = Results()
-        cv_res.add(res)
-
-        metrics = cv_res.measures()
-          
-        #Early stopping on filtered MRR
-        if best_valid_mrr >= metrics[0]:
-          logger.info("Validation filtered MRR decreased, stopping here.")
-          break
-        else:
-          best_valid_mrr = metrics[0]
 
       it += 1
       if it >= param.epoch:
@@ -426,9 +402,4 @@ class TransE_L1(TransE_L2):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
     return - np.sum(np.abs(e + (r[j,:] - e[k,:])),1)
-
-
-
-
-
 

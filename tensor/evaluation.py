@@ -56,13 +56,13 @@ class Scorer(object):
       elif i not in self.sub[(j,k)]:
         self.sub[(j,k)].append(i)
 
-  def compute(self, model, data):
+  def compute(self, model, test):
 
-    nb_test = len(data.values)
+    nb_test = len(test.values)
     ranks = np.empty(2 * nb_test)
     raw_ranks = np.empty(2 * nb_test)
 
-    for a,(i,j,k) in enumerate(data.indexes[:nb_test,:]):
+    for a,(i,j,k) in enumerate(test.indexes[:nb_test,:]):
 
       res_obj = model.eval_o(i,j)
       raw_ranks[a] = 1 + np.sum( res_obj > res_obj[k] )

@@ -18,7 +18,7 @@ class Triples(object):
 class Parameters(object):
 
   def __init__(self, model, lmbda=0.1, k=100, lr=0.5, epoch=1000, bsize=500, 
-    negative=10, valid=500, sgd='adagrad'):
+    negative=10, sgd='adagrad'):
 
     self.model = model
     self.lmbda = lmbda
@@ -27,5 +27,4 @@ class Parameters(object):
     self.epoch = epoch
     self.batch_size = bsize
     self.neg_ratio = negative
-    self.valid_scores = valid
     self.sgd = sgd

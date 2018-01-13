@@ -24,8 +24,7 @@ class Experiment(object):
     self.model = vars(models)[param.model]()
     self.param = param
 
-    self.valid_results = Results()
-    self.test_results = Results()
+    self.results = Results()
 
   def induce(self):
     logger.info("Inducing")
@@ -33,11 +32,8 @@ class Experiment(object):
     self.model.fit(self.train, self.valid, self.param, self.n_entities, 
       self.n_relations, self.scorer)
 
-    res = self.scorer.compute(self.model, self.valid)
-    self.valid_results.add(res)
-
   def evaluate(self):
     logger.info("Evaluating")
     res = self.scorer.compute(self.model, self.test)
-    self.test_results.add(res)
-    self.test_results.measures()
+    self.results.add(res)
+    self.results.measures()
