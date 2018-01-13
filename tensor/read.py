@@ -1,7 +1,6 @@
 import scipy
 import scipy.io
 import random as rd
-import cPickle
 
 from experiment import *
 
