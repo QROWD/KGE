@@ -1,13 +1,8 @@
-import uuid
-import time
-import subprocess
-import xml.dom.minidom
-import cPickle as pickle
 import numpy as np
 
 import models
 from evaluation import *
-from log import *
+from tracelog import *
 from tools import *
 
 class Experiment(object):
@@ -18,9 +13,6 @@ class Experiment(object):
     self.valid = valid
     self.test = test
 
-    self.train_tensor = None
-    self.train_mask = None
-    self.positives_only = True
     self.n_entities = len(entities)
     self.n_relations = len(relations)
 
@@ -33,13 +25,13 @@ class Experiment(object):
     self.param = param
 
     self.valid_results = Results()
-    self.results = Results()
+    self.test_results = Results()
 
   def induce(self):
     logger.info("Inducing")
 
     self.model.fit(self.train, self.valid, self.param, self.n_entities, 
-      self.n_relations, self.n_entities, self.scorer)
+      self.n_relations, self.scorer)
 
     res = self.scorer.compute(self.model, self.valid)
     self.valid_results.add(res)
@@ -47,5 +39,5 @@ class Experiment(object):
   def evaluate(self):
     logger.info("Evaluating")
     res = self.scorer.compute(self.model, self.test)
-    self.results.add(res)
-    self.results.measures()
+    self.test_results.add(res)
+    self.test_results.measures()
