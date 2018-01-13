@@ -17,16 +17,15 @@ class Triples(object):
 
 class Parameters(object):
 
-  def __init__(self, model, lmbda=0.1, embedding_size=100, learning_rate=0.5, 
-    max_iter=1000, batch_size=500, neg_ratio=10, valid_scores=500, 
-    learning_policy='adagrad'):
+  def __init__(self, model, lmbda=0.1, k=100, lr=0.5, epoch=1000, bsize=500, 
+    negative=10, valid=500, sgd='adagrad'):
 
     self.model = model
     self.lmbda = lmbda
-    self.embedding_size = embedding_size
-    self.learning_rate = learning_rate
-    self.max_iter = max_iter
-    self.batch_size = batch_size
-    self.neg_ratio = neg_ratio
-    self.valid_scores = valid_scores
-    self.learning_policy = learning_policy
+    self.k = k
+    self.lr = lr
+    self.epoch = epoch
+    self.batch_size = bsize
+    self.neg_ratio = negative
+    self.valid_scores = valid
+    self.sgd = sgd

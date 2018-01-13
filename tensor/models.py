@@ -34,7 +34,7 @@ class Model(object):
     self.n = max(train.indexes[:,0]) + 1
     self.m = max(train.indexes[:,1]) + 1
     self.l = max(train.indexes[:,2]) + 1
-    self.k = param.embedding_size
+    self.k = param.k
 
   def get_pred_symb_vars(self):
     return [self.rows, self.cols, self.tubes]
@@ -77,11 +77,11 @@ class Model(object):
 
   def fit(self, train, valid, param, n, m, scorer):
 
-    self.n, self.m, self.l, self.k = n, m, n, param.embedding_size
+    self.n, self.m, self.l, self.k = n, m, n, param.k
     self.setup(train, valid, param)
     
     train_vals, train_symbs, valid_vals = self.batch(train, valid, param)
-    opt = downhill.build(param.learning_policy, loss=self.loss_to_opt, 
+    opt = downhill.build(param.sgd, loss=self.loss_to_opt, 
       inputs=train_symbs, monitor_gradients=True)
 
     train_vals = downhill.Dataset(train_vals, name = 'train')
@@ -91,11 +91,11 @@ class Model(object):
     best_valid_mrr = -1
     best_valid_ap = -1
     for tm, vm in opt.iterate(train_vals, None,
-      max_updates=param.max_iter,
+      max_updates=param.epoch,
       validate_every=9999999,
       patience=9999999,
       max_gradient_norm=1,
-      learning_rate=param.learning_rate):
+      learning_rate=param.lr):
 
       if it % param.valid_scores == 0 and scorer != None:
         logger.info("Validation metrics:")
@@ -113,7 +113,7 @@ class Model(object):
           best_valid_mrr = metrics[0]
 
       it += 1
-      if it >= param.max_iter:
+      if it >= param.epoch:
         break
 
   def predict(self, test_idxs):
