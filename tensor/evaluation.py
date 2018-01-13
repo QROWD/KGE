@@ -1,15 +1,12 @@
 import operator
 
-from log import *
+from tracelog import *
 from tools import *
 
 class Result(object):
 
-  def __init__(self, preds, ranks, raw_ranks):
-
-    self.preds = preds
+  def __init__(self, ranks, raw_ranks):
     self.ranks = ranks
-    self.raw_ranks = raw_ranks
     self.mrr = np.mean(1.0 / ranks)
     self.raw_mrr = np.mean(1.0 / raw_ranks)
 
@@ -47,7 +44,7 @@ class Scorer(object):
     self.update(test.indexes)
     self.update(valid.indexes)
 
-  def update(self,triples):
+  def update(self, triples):
     for i,j,k in triples:
       if (i,j) not in self.obj:
         self.obj[(i,j)] = [k]
@@ -59,18 +56,13 @@ class Scorer(object):
       elif i not in self.sub[(j,k)]:
         self.sub[(j,k)].append(i)
 
-  def compute(self, model, eval_set):
+  def compute(self, model, data):
 
-    preds = model.predict(eval_set.indexes)
-
-    ranks = None
-    raw_ranks = None
-
-    nb_test = len(eval_set.values)
+    nb_test = len(data.values)
     ranks = np.empty(2 * nb_test)
     raw_ranks = np.empty(2 * nb_test)
 
-    for a,(i,j,k) in enumerate(eval_set.indexes[:nb_test,:]):
+    for a,(i,j,k) in enumerate(data.indexes[:nb_test,:]):
 
       res_obj = model.eval_o(i,j)
       raw_ranks[a] = 1 + np.sum( res_obj > res_obj[k] )
@@ -81,4 +73,4 @@ class Scorer(object):
       ranks[nb_test + a] = raw_ranks[nb_test + a] - np.sum(
         res_sub[self.sub[(j,k)]] > res_sub[i] )
 
-    return Result(preds, ranks, raw_ranks)
+    return Result(ranks, raw_ranks)
