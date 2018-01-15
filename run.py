@@ -2,7 +2,6 @@ import sys, os
 import argparse
 
 import tensor
-import tensor.tracelog as log
 import tensor.tools as tools
 from tensor.read import *
 
@@ -43,11 +42,11 @@ if __name__ == "__main__":
 
   model = Experiment(data, train, valid, test, entities, relations, param)
 
-  log.logger.info( "Technique: " + str(param.model))
-  log.logger.info( "Learning rate: " + str(param.lr))
-  log.logger.info( "Max epochs: " + str(param.epoch))
-  log.logger.info( "Generated negatives ratio: " + str(param.neg_ratio))
-  log.logger.info( "Batch size: " + str(param.batch_size))
+  print("Technique: " + str(param.model))
+  print("Learning rate: " + str(param.lr))
+  print("Max epochs: " + str(param.epoch))
+  print("Generated negatives ratio: " + str(param.neg_ratio))
+  print("Batch size: " + str(param.batch_size))
 
   model.induce()
   model.evaluate()

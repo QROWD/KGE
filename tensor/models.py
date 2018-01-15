@@ -4,7 +4,6 @@ import theano.tensor as T
 
 from batching import * 
 from evaluation import *
-from tracelog import *
 from tools import *
 
 theano.config.floatX = 'float32'

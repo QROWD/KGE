@@ -2,7 +2,6 @@ import numpy as np
 
 import models
 from evaluation import *
-from tracelog import *
 from tools import *
 
 class Experiment(object):
@@ -16,9 +15,9 @@ class Experiment(object):
     self.n_entities = len(entities)
     self.n_relations = len(relations)
 
-    logger.info("Nb entities: " + str(self.n_entities))
-    logger.info("Nb relations: " + str(self.n_relations))
-    logger.info("Nb triples: " + str(len(data)))
+    print("Nb entities: " + str(self.n_entities))
+    print("Nb relations: " + str(self.n_relations))
+    print("Nb triples: " + str(len(data)))
     
     self.scorer = Scorer(train, valid, test)
     self.model = vars(models)[param.model]()
@@ -27,13 +26,13 @@ class Experiment(object):
     self.results = Results()
 
   def induce(self):
-    logger.info("Inducing")
+    print("Inducing")
 
     self.model.fit(self.train, self.valid, self.param, self.n_entities, 
       self.n_relations, self.scorer)
 
   def evaluate(self):
-    logger.info("Evaluating")
+    print("Evaluating")
     res = self.scorer.compute(self.model, self.test)
     self.results.add(res)
     self.results.measures()

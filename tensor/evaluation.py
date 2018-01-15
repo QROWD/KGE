@@ -1,6 +1,5 @@
 import operator
 
-from tracelog import *
 from tools import *
 
 class Result(object):
@@ -28,8 +27,8 @@ class Results(object):
     hits3 = np.mean([(np.sum(ranks <= 3)) / float(len(ranks)) for ranks in ranks_list])
     hits10= np.mean([(np.sum(ranks <= 10))/ float(len(ranks)) for ranks in ranks_list])
 
-    logger.info("MRR\tRMRR\tH@1\tH@3\tH@10")
-    logger.info("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % (mrr, raw_mrr, hits1, hits3, hits10))
+    print("MRR\tRMRR\tH@1\tH@3\tH@10")
+    print("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % (mrr, raw_mrr, hits1, hits3, hits10))
 
     return (mrr, raw_mrr, hits1, hits3, hits10)
 
@@ -62,13 +61,14 @@ class Scorer(object):
     ranks = np.empty(2 * nb_test)
     raw_ranks = np.empty(2 * nb_test)
 
-    for a,(i,j,k) in enumerate(test.indexes[:nb_test,:]):
+    for a, (i, j, k) in enumerate(test.indexes):
 
-      res_obj = model.eval_o(i,j)
-      raw_ranks[a] = 1 + np.sum( res_obj > res_obj[k] )
+      res_obj = model.eval_o(i, j)
+      raw_ranks[a] = 1 + np.sum(res_obj > res_obj[k])
       ranks[a] = raw_ranks[a] - np.sum(res_obj[self.obj[(i,j)]] > res_obj[k])
 
-      res_sub = model.eval_s(j,k)
+      res_sub = model.eval_s(j, k)
+
       raw_ranks[nb_test + a] = 1 + np.sum( res_sub > res_sub[i] )
       ranks[nb_test + a] = raw_ranks[nb_test + a] - np.sum(
         res_sub[self.sub[(j,k)]] > res_sub[i] )
