@@ -1,6 +1,5 @@
-#PBS -N pygpu-test
 #PBS -l select=1:ngpus=1
-#PBS -l walltime=24:00:00  
+#PBS -l walltime=24:00:00
 
 module load gcc
 module load python
@@ -11,4 +10,4 @@ export PATH="/mnt/nfs/home/lpfgarcia/conda/bin:$PATH"
 
 cd /mnt/nfs/home/lpfgarcia/kge/
 
-DEVICE=cuda0 python run.py --model $model --data $data --k $k --epoch $epoch  --negative $negative> out.log
+DEVICE=cuda0 python run.py --model $model --data $data --k $k --epoch $epoch  --negative $negative > $model.log
