@@ -202,6 +202,21 @@ class Complex(Model):
       + T.sqr(self.r1[self.cols,:]).mean() \
       + T.sqr(self.r2[self.cols,:]).mean()
 
+  def eval_o(self, i, j):
+    e1 = self.e1.get_value(borrow=True)
+    r1 = self.r1.get_value(borrow=True)
+    e2 = self.e2.get_value(borrow=True)
+    r2 = self.r2.get_value(borrow=True)
+    return ((e1[i,:] * r1[j,:]).dot(e1.T) + (e2[i,:] * r1[j,:]).dot(e2.T) + 
+      (e1[i,:] * r2[j,:]).dot(e2.T) - (e2[i,:] * r2[j,:]).dot(e1.T))
+
+  def eval_s(self, j, k):
+    e1 = self.e1.get_value(borrow=True)
+    r1 = self.r1.get_value(borrow=True)
+    e2 = self.e2.get_value(borrow=True)
+    r2 = self.r2.get_value(borrow=True)
+    return (e1.dot(r1[j,:] * e1[k,:]) + e2.dot(r1[j,:] * e2[k,:]) + 
+      e1.dot(r2[j,:] * e2[k,:]) - e2.dot(r2[j,:] * e1[k,:]))
 
 class Complex_Logistic(Complex):
 
@@ -236,22 +251,6 @@ class Complex_Logistic(Complex):
       + T.sqr(self.e2[self.tubes,:]).mean() \
       + T.sqr(self.r1[self.cols,:]).mean() \
       + T.sqr(self.r2[self.cols,:]).mean()
-
-  def eval_o(self, i, j):
-    e1 = self.e1.get_value(borrow=True)
-    r1 = self.r1.get_value(borrow=True)
-    e2 = self.e2.get_value(borrow=True)
-    r2 = self.r2.get_value(borrow=True)
-    return ((e1[i,:] * r1[j,:]).dot(e1.T) + (e2[i,:] * r1[j,:]).dot(e2.T) + 
-      (e1[i,:] * r2[j,:]).dot(e2.T) - (e2[i,:] * r2[j,:]).dot(e1.T))
-
-  def eval_s(self, j, k):
-    e1 = self.e1.get_value(borrow=True)
-    r1 = self.r1.get_value(borrow=True)
-    e2 = self.e2.get_value(borrow=True)
-    r2 = self.r2.get_value(borrow=True)
-    return (e1.dot(r1[j,:] * e1[k,:]) + e2.dot(r1[j,:] * e2[k,:]) + 
-      e1.dot(r2[j,:] * e2[k,:]) - e2.dot(r2[j,:] * e1[k,:]))
 
 class DistMult(Model):
 
@@ -397,14 +396,3 @@ class TransE_L1(TransE_L2):
       reshape((int(self.batch_size),int(self.neg_ratio))),1) ).mean()
 
     self.regul_func = 0 
-
-  def eval_o(self, i, j):
-    e = self.e.get_value(borrow=True)
-    r = self.r.get_value(borrow=True)
-    return - np.sum(np.abs((e[i,:] + r[j,:]) - e),1)
-
-  def eval_s(self, j, k):
-    e = self.e.get_value(borrow=True)
-    r = self.r.get_value(borrow=True)
-    return - np.sum(np.abs(e + (r[j,:] - e[k,:])),1)
-
