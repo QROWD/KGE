@@ -27,6 +27,8 @@ if __name__ == "__main__":
     help='Number of examples in the batch sample (default: 500)')
   parser.add_argument('--negative', type=int, default=10, metavar='', 
     help='Number of negative examples generated (default: 10)')
+  parser.add_argument('--valid', type=int, default=10, metavar='', 
+    help='Number of iterations before validation (default: 10)')
   parser.add_argument('--rand', default=1234, type=int, metavar='',
     help='Set the random seed (default: 1234')
 
@@ -38,7 +40,8 @@ if __name__ == "__main__":
   data, train, valid, test, entities, relations = load(path, args.data + ".txt")
 
   param = Parameters(args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
-    epoch=args.epoch, bsize=args.bsize, negative=args.negative)
+    epoch=args.epoch, bsize=args.bsize, negative=args.negative, 
+    valid=args.valid)
 
   model = Experiment(data, train, valid, test, entities, relations, param)
 

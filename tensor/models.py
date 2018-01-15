@@ -87,6 +87,12 @@ class Model(object):
       max_gradient_norm=1,
       learning_rate=param.lr):
 
+      if it % param.valid_scores == 0 and scorer != None:
+        res = scorer.compute(self, valid)
+        cv_res = Results()
+        cv_res.add(res)
+        cv_res.measures()
+
       it += 1
       if it >= param.epoch:
         break
