@@ -12,8 +12,8 @@ class Experiment(object):
     self.valid = valid
     self.test = test
 
-    self.n_entities = len(entities)
-    self.n_relations = len(relations)
+    self.n_entities = entities
+    self.n_relations = relations
 
     print("Nb entities: " + str(self.n_entities))
     print("Nb relations: " + str(self.n_relations))
