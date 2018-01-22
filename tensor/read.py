@@ -1,5 +1,4 @@
 import numpy as np
-import random as rd
 
 from experiment import *
 
@@ -8,29 +7,31 @@ def read(filename, split="\t"):
   table = np.genfromtxt(filename, delimiter=split, dtype='|S146')
   entities = (np.unique((table[:,0], table[:,2]))).tolist()
   relations = (np.unique(table[:,1])).tolist()
-  data = dict()
 
+  data = dict()
   for s, p, o in table:
-    s = entities.index(s)
-    p = relations.index(p)
-    o = entities.index(o)
+    s, p, o = entities.index(s), relations.index(p), entities.index(o)
     data[(s, p, o)] = 1
 
-  return data, len(entities), len(relations)
+  return np.array(data.items()), len(entities), len(relations)
 
-def cv(data, rate):
-   train = dict(rd.sample(data.items(), int(len(data)*(1 -rate))))
-   valid = dict(rd.sample(data.items(), int(len(data)*rate)))
-   test = dict(rd.sample(data.items(), int(len(data)*rate)))
-   return train, valid, test
+def kcv(data, k=10):
+
+  index = np.repeat(range(k), int(len(data)/k))
+  data = data[0:len(index),:]
+
+  test = [dict(data[index == i,:]) for i in range(k)]
+  valid = [dict(data[index == i,:]) for  i in range(1, k) + range(1)]
+  train = [dict(data[(index != i) & (index != i-1),:]) for i in range(1, k)]
+  return train, valid, test
 
 def load(path, file):
 
   data, entities, relations = read(path + '/datasets/' + file)
-  train, valid, test = cv(data, 0.1)
+  train, valid, test = kcv(data, 10)
 
-  train = Triples(train)
-  valid = Triples(valid)
-  test = Triples(test)
+  test = [Triples(i) for i in test]
+  valid = [Triples(i) for i in valid]
+  train = [Triples(i) for i in train]
 
   return data, train, valid, test, entities, relations
