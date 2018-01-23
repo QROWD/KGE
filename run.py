@@ -29,6 +29,8 @@ if __name__ == "__main__":
     help='Number of negative examples generated (default: 10)')
   parser.add_argument('--valid', type=int, default=10, metavar='', 
     help='Number of iterations before validation (default: 10)')
+  parser.add_argument('--folds', type=int, default=10, metavar='', 
+    help='Number of k-fold cross validation (default: 10)')
   parser.add_argument('--rand', default=1234, type=int, metavar='',
     help='Set the random seed (default: 1234')
 
@@ -37,19 +39,23 @@ if __name__ == "__main__":
   np.random.seed(args.rand)
 
   path = os.path.dirname(os.path.realpath( os.path.basename(__file__)))
-  data, train, valid, test, entities, relations = load(path, args.data + ".txt")
+  data, entities, relations = load(path, args.data + ".txt")
+  train, valid, test = kcv(data, args.folds)
+
+  print("Nb entities: " + str(entities))
+  print("Nb relations: " + str(relations))
+  print("Nb triples: " + str(len(data)))
+  print("Technique: " + str(args.model))
+  print("Learning rate: " + str(args.lr))
+  print("Max epochs: " + str(args.epoch))
+  print("Generated negatives ratio: " + str(args.negative))
+  print("Batch size: " + str(args.bsize))
 
   param = Parameters(args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
     epoch=args.epoch, bsize=args.bsize, negative=args.negative, 
     valid=args.valid)
 
-  model = Experiment(data, train, valid, test, entities, relations, param)
-
-  print("Technique: " + str(param.model))
-  print("Learning rate: " + str(param.lr))
-  print("Max epochs: " + str(param.epoch))
-  print("Generated negatives ratio: " + str(param.neg_ratio))
-  print("Batch size: " + str(param.batch_size))
-
-  model.induce()
-  model.evaluate()
+  for i in range(10):
+    model = Experiment(train[i], valid[i], test[i], entities, relations, param)
+    model.induce()
+    model.evaluate()
