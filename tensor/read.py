@@ -26,14 +26,9 @@ def kcv(data, folds=10):
   idx = np.repeat(range(folds), int(len(data)/folds))
   data = data[0:len(idx),:]
 
-  aux = range(folds)
-  tmp = range(1, folds) + range(1)
+  train = [dict(data[(idx != i),:]) for i in range(folds)]
+  test = [dict(data[idx == i,:]) for i in range(folds)]
 
-  test = [dict(data[idx == i,:]) for i in aux]
-  valid = [dict(data[idx == i,:]) for  i in tmp]
-  train = [dict(data[(idx != aux[i]) & (idx != tmp[i]),:]) for i in range(folds)]
-
-  test = [Triples(i) for i in test]
-  valid = [Triples(i) for i in valid]
   train = [Triples(i) for i in train]
-  return train, valid, test
+  test = [Triples(i) for i in test]
+  return train, test

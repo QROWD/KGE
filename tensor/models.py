@@ -41,23 +41,20 @@ class Model(object):
   def get_pred_args(self, test):
     return [test[:,0], test[:,1], test[:,2]]
 
-  def batch(self, train, valid, param):
+  def batch(self, train, param):
 
     train_batch = Batch_Loader(train, n_entities=self.n, 
       batch_size=param.batch_size, neg_ratio=param.neg_ratio)
 
-    valid_batch = Batch_Loader(valid, n_entities=self.n, 
-      batch_size=len(valid.values), neg_ratio = param.neg_ratio,)
-
     inputs = [self.ys, self.rows, self.cols, self.tubes]
-    return train_batch, inputs, valid_batch
+    return train_batch, inputs
 
   def allocate(self):
     params = self.tensors()
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
-  def setup(self,train, valid, param):
+  def setup(self,train, param):
 
     self.allocate()
     self.define_loss()
@@ -65,12 +62,12 @@ class Model(object):
     self.loss_to_opt = self.loss + param.lmbda * self.regul_func
 
 
-  def fit(self, train, valid, param, n, m, scorer):
+  def fit(self, train, param, n, m, scorer):
 
     self.n, self.m, self.l, self.k = n, m, n, param.k
-    self.setup(train, valid, param)
+    self.setup(train, param)
     
-    train_vals, train_symbs, valid_vals = self.batch(train, valid, param)
+    train_vals, train_symbs = self.batch(train, param)
     opt = downhill.build(param.sgd, loss=self.loss_to_opt, 
       inputs=train_symbs, monitor_gradients=True)
 
@@ -78,20 +75,12 @@ class Model(object):
 
 
     it = 1
-    best_valid_mrr = -1
-    best_valid_ap = -1
     for tm, vm in opt.iterate(train_vals, None,
       max_updates=param.epoch,
       validate_every=9999999,
       patience=9999999,
       max_gradient_norm=1,
       learning_rate=param.lr):
-
-      if it % param.valid_scores == 0 and scorer != None:
-        res = scorer.compute(self, valid)
-        cv_res = Results()
-        cv_res.add(res)
-        cv_res.measures()
 
       it += 1
       if it >= param.epoch:
@@ -323,25 +312,20 @@ class TransE_L2(Model):
               'r': L2_proj(randn(self.m, self.k))}
     return params
 
-  def setup(self, train, valid, param):
+  def setup(self, train, param):
     self.batch_size = param.batch_size
     self.neg_ratio = float(param.neg_ratio)
     self.margin = param.lmbda
 
-    super(TransE_L2,self).setup(train, valid, param)
+    super(TransE_L2,self).setup(train, param)
 
-  def batch(self, train, valid, param):
+  def batch(self, train, param):
 
     train = TransE_Batch_Loader(self, train, n_entities = max(self.n,self.l), batch_size = param.batch_size,
          neg_ratio = param.neg_ratio, contiguous_sampling = False)  
     inputs=[self.rows, self.cols, self.tubes]
-    if valid != None:
-      valid = Batch_Loader(valid, n_entities = max(self.n,self.l), batch_size = len(valid.values), 
-          neg_ratio = param.neg_ratio, contiguous_sampling = False)    
-    else:
-      valid = None
 
-    return train, inputs, valid
+    return train, inputs
 
   def define_loss(self):
 
@@ -377,8 +361,8 @@ class TransE_L1(TransE_L2):
     super(TransE_L1, self).__init__()
     self.name = self.__class__.__name__
 
-  def setup(self, train, valid, param):
-    super(TransE_L1,self).setup(train, valid, param)
+  def setup(self, train, param):
+    super(TransE_L1,self).setup(train, param)
 
   def define_loss(self):
 

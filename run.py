@@ -27,8 +27,6 @@ if __name__ == "__main__":
     help='Number of examples in the batch sample (default: 500)')
   parser.add_argument('--negative', type=int, default=10, metavar='', 
     help='Number of negative examples generated (default: 10)')
-  parser.add_argument('--valid', type=int, default=10, metavar='', 
-    help='Number of iterations before validation (default: 10)')
   parser.add_argument('--folds', type=int, default=10, metavar='', 
     help='Number of k-fold cross validation (default: 10)')
   parser.add_argument('--rand', default=1234, type=int, metavar='',
@@ -40,7 +38,7 @@ if __name__ == "__main__":
 
   path = os.path.dirname(os.path.realpath( os.path.basename(__file__)))
   data, entities, relations = load(path, args.data + ".txt")
-  train, valid, test = kcv(data, args.folds)
+  train, test = kcv(data, args.folds)
 
   print("Nb entities: " + str(entities))
   print("Nb relations: " + str(relations))
@@ -52,10 +50,9 @@ if __name__ == "__main__":
   print("Batch size: " + str(args.bsize))
 
   param = Parameters(args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
-    epoch=args.epoch, bsize=args.bsize, negative=args.negative, 
-    valid=args.valid)
+    epoch=args.epoch, bsize=args.bsize, negative=args.negative)
 
   for i in range(10):
-    model = Experiment(train[i], valid[i], test[i], entities, relations, param)
+    model = Experiment(train[i], test[i], entities, relations, param)
     model.induce()
     model.evaluate()

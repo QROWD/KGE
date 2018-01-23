@@ -34,14 +34,13 @@ class Results(object):
 
 class Scorer(object):
 
-  def __init__(self, train, valid, test):
+  def __init__(self, train, test):
 
     self.obj = {}
     self.sub = {}
 
     self.update(train.indexes)
     self.update(test.indexes)
-    self.update(valid.indexes)
 
   def update(self, triples):
     for i,j,k in triples:

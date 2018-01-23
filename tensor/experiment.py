@@ -6,16 +6,15 @@ from tools import *
 
 class Experiment(object):
 
-  def __init__(self, train, valid, test, entities, relations, param):
+  def __init__(self, train, test, entities, relations, param):
 
     self.train = train
-    self.valid = valid
     self.test = test
 
     self.n_entities = entities
     self.n_relations = relations
 
-    self.scorer = Scorer(train, valid, test)
+    self.scorer = Scorer(train, test)
     self.model = vars(models)[param.model]()
     self.param = param
 
@@ -24,8 +23,8 @@ class Experiment(object):
   def induce(self):
     print("Inducing")
 
-    self.model.fit(self.train, self.valid, self.param, self.n_entities, 
-      self.n_relations, self.scorer)
+    self.model.fit(self.train, self.param, self.n_entities, self.n_relations, 
+      self.scorer)
 
   def evaluate(self):
     print("Evaluating")
