@@ -13,25 +13,27 @@ def read(filename, split="\t"):
     s, p, o = entities.index(s), relations.index(p), entities.index(o)
     data[(s, p, o)] = 1
 
-  return np.array(data.items()), len(entities), len(relations)
-
-def kcv(data, k=10):
-
-  index = np.repeat(range(k), int(len(data)/k))
-  data = data[0:len(index),:]
-
-  test = [dict(data[index == i,:]) for i in range(k)]
-  valid = [dict(data[index == i,:]) for  i in range(1, k) + range(1)]
-  train = [dict(data[(index != i) & (index != i-1),:]) for i in range(1, k)]
-  return train, valid, test
+  data = np.array(data.items())
+  return data, len(entities), len(relations)
 
 def load(path, file):
 
   data, entities, relations = read(path + '/datasets/' + file)
-  train, valid, test = kcv(data, 10)
+  return data, entities, relations
+
+def kcv(data, folds=10):
+
+  idx = np.repeat(range(folds), int(len(data)/folds))
+  data = data[0:len(idx),:]
+
+  aux = range(folds)
+  tmp = range(1, folds) + range(1)
+
+  test = [dict(data[idx == i,:]) for i in aux]
+  valid = [dict(data[idx == i,:]) for  i in tmp]
+  train = [dict(data[(idx != aux[i]) & (idx != tmp[i]),:]) for i in range(folds)]
 
   test = [Triples(i) for i in test]
   valid = [Triples(i) for i in valid]
   train = [Triples(i) for i in train]
-
-  return data, train, valid, test, entities, relations
+  return train, valid, test
