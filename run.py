@@ -53,6 +53,7 @@ if __name__ == "__main__":
     epoch=args.epoch, bsize=args.bsize, negative=args.negative)
 
   for i in range(10):
+    print("Fold " + str(i+1) + " :")
     model = Experiment(train[i], test[i], entities, relations, param)
     model.induce()
     model.evaluate()
