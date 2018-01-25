@@ -7,8 +7,8 @@ from evaluation import *
 from tools import *
 
 theano.config.floatX = 'float32'
-theano.config.mode = 'FAST_RUN'
-theano.config.exception_verbosity = 'high'
+#theano.config.mode = 'FAST_RUN'
+#theano.config.exception_verbosity = 'high'
 
 class Model(object):
 
@@ -73,9 +73,8 @@ class Model(object):
 
     train_vals = downhill.Dataset(train_vals, name = 'train')
 
-
     it = 1
-    for tm, vm in opt.iterate(train_vals, None,
+    for _ in opt.iterate(train_vals, None,
       max_updates=param.epoch,
       validate_every=9999999,
       patience=9999999,
@@ -135,23 +134,6 @@ class Polyadic(Model):
     w = self.w.get_value(borrow=True)
     return u.dot(v[j,:] * w[k,:])
 
-class Polyadic_Logistic(Polyadic):
-
-  def __init__(self):
-    super(Polyadic_Logistic, self).__init__()
-    self.name = self.__class__.__name__
-
-  def define_loss(self):
-    self.pred_func = T.nnet.sigmoid( T.sum(self.u[self.rows,:] * 
-      self.v[self.cols,:] * self.w[self.tubes,:], 1))
-
-    self.loss = T.nnet.softplus( - self.ys * T.sum(self.u[self.rows,:] * 
-      self.v[self.cols,:] * self.w[self.tubes,:], 1)).mean()
-
-    self.regul_func = T.sqr(self.u[self.rows,:]).mean() \
-      + T.sqr(self.v[self.cols,:]).mean() \
-      + T.sqr(self.w[self.tubes,:]).mean()
-
 class Complex(Model):
 
   def __init__(self):
@@ -207,40 +189,6 @@ class Complex(Model):
     return (e1.dot(r1[j,:] * e1[k,:]) + e2.dot(r1[j,:] * e2[k,:]) + 
       e1.dot(r2[j,:] * e2[k,:]) - e2.dot(r2[j,:] * e1[k,:]))
 
-class Complex_Logistic(Complex):
-
-  def __init__(self):
-    super(Complex_Logistic, self).__init__()
-    self.name = self.__class__.__name__
-
-  def define_loss(self):
-
-    self.pred_func =  T.nnet.sigmoid(T.sum(self.e1[self.rows,:] * 
-      self.r1[self.cols,:] * self.e1[self.tubes,:], 1) \
-      + T.sum(self.e2[self.rows,:] * self.r1[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-      + T.sum(self.e1[self.rows,:] * self.r2[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-      - T.sum(self.e2[self.rows,:] * self.r2[self.cols,:] * 
-      self.e1[self.tubes,:], 1))
-
-    self.loss = T.nnet.softplus(
-      - self.ys * (T.sum(self.e1[self.rows,:] * self.r1[self.cols,:] * 
-      self.e1[self.tubes,:], 1) \
-      + T.sum(self.e2[self.rows,:] * self.r1[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-      + T.sum(self.e1[self.rows,:] * self.r2[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-      - T.sum(self.e2[self.rows,:] * self.r2[self.cols,:] * 
-      self.e1[self.tubes,:], 1) )).mean()
-
-    self.regul_func = T.sqr(self.e1[self.rows,:]).mean() \
-      + T.sqr(self.e2[self.rows,:]).mean() \
-      + T.sqr(self.e1[self.tubes,:]).mean() \
-      + T.sqr(self.e2[self.tubes,:]).mean() \
-      + T.sqr(self.r1[self.cols,:]).mean() \
-      + T.sqr(self.r2[self.cols,:]).mean()
-
 class DistMult(Model):
 
   def __init__(self):
@@ -276,29 +224,10 @@ class DistMult(Model):
     r = self.r.get_value(borrow=True)
     return e.dot(r[j,:] * e[k,:])
 
-class DistMult_Logistic(DistMult):
+class TransE(Model):
 
   def __init__(self):
-    super(DistMult_Logistic, self).__init__()
-    self.name = self.__class__.__name__
-
-  def define_loss(self):
-
-    self.pred_func = T.nnet.sigmoid( T.sum(self.e[self.rows,:] * 
-      self.r[self.cols,:] * self.e[self.tubes,:], 1))
-
-    self.loss = T.nnet.softplus( - self.ys * T.sum(self.e[self.rows,:] * 
-      self.r[self.cols,:] * self.e[self.tubes,:], 1)).mean()
-
-    self.regul_func = T.sqr(self.e[self.rows,:]).mean() \
-      + T.sqr(self.r[self.cols,:]).mean() \
-      + T.sqr(self.e[self.tubes,:]).mean()
-
-
-class TransE_L2(Model):
-
-  def __init__(self):
-    super(TransE_L2, self).__init__()
+    super(TransE, self).__init__()
     self.name = self.__class__.__name__
 
     self.e = None
@@ -317,7 +246,7 @@ class TransE_L2(Model):
     self.neg_ratio = float(param.neg_ratio)
     self.margin = param.lmbda
 
-    super(TransE_L2,self).setup(train, param)
+    super(TransE, self).setup(train, param)
 
   def batch(self, train, param):
 
@@ -353,30 +282,3 @@ class TransE_L2(Model):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
     return - np.sum(np.square(e + (r[j,:] - e[k,:]) ),1)
-
-
-class TransE_L1(TransE_L2):
-
-  def __init__(self):
-    super(TransE_L1, self).__init__()
-    self.name = self.__class__.__name__
-
-  def setup(self, train, param):
-    super(TransE_L1,self).setup(train, param)
-
-  def define_loss(self):
-
-    self.pred_func = - T.sum(T.abs_(self.e[self.rows,:] + 
-      self.r[self.cols,:] - self.e[self.tubes,:]),1)
-
-    self.loss = T.maximum( 0, self.margin + 
-      T.sum(T.abs_(self.e[self.rows[:self.batch_size],:] + 
-        self.r[self.cols[:self.batch_size],:] - 
-        self.e[self.tubes[:self.batch_size],:]),1) \
-      - (1.0/self.neg_ratio) * 
-      T.sum(T.sum(T.abs_(self.e[self.rows[self.batch_size:],:] + 
-        self.r[self.cols[self.batch_size:],:] - 
-        self.e[self.tubes[self.batch_size:],:]),1).
-      reshape((int(self.batch_size),int(self.neg_ratio))),1) ).mean()
-
-    self.regul_func = 0 
