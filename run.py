@@ -8,7 +8,7 @@ from tensor.read import *
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(
-    description='Link Prediction Experiment'
+    description='Link Prediction Experiment with Negative Sampling'
   )
 
   parser.add_argument('--model', metavar='', 
@@ -49,11 +49,11 @@ if __name__ == "__main__":
   print("Generated negatives ratio: " + str(args.negative))
   print("Batch size: " + str(args.bsize))
 
-  param = Parameters(args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
+  param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
     epoch=args.epoch, bsize=args.bsize, negative=args.negative)
 
-  for i in range(10):
-    print("Fold " + str(i+1) + " :")
+  for i in range(args.folds):
+    print("Fold " + str(i+1) + ":")
     model = Experiment(train[i], test[i], entities, relations, param)
     model.induce()
     model.evaluate()
