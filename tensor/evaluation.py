@@ -14,11 +14,9 @@ class Results(object):
   def __init__(self):
     self.res = list()
 
-  def add(self, res):
+  def measures(self, res):
+
     self.res.append(res)
-
-  def measures(self):
-
     mrr = np.mean([res.mrr for res in self.res])
     raw_mrr = np.mean([res.raw_mrr for res in self.res])
     rank = [res.ranks for res in self.res]
@@ -36,23 +34,12 @@ class Scorer(object):
 
   def __init__(self, train, test):
 
-    self.obj = {}
-    self.sub = {}
+    data = np.concatenate((train.indexes, test.indexes), axis=0)
+    self.obj = self.sub = {}
 
-    self.update(train.indexes)
-    self.update(test.indexes)
-
-  def update(self, triples):
-    for i,j,k in triples:
-      if (i,j) not in self.obj:
-        self.obj[(i,j)] = [k]
-      elif k not in self.obj[(i,j)]:
-        self.obj[(i,j)].append(k)
-
-      if (j,k) not in self.sub:
-        self.sub[(j,k)] = [i]
-      elif i not in self.sub[(j,k)]:
-        self.sub[(j,k)].append(i)
+    for i, j, k in data:
+      self.obj[(i, j)] = k
+      self.sub[(j, k)] = i
 
   def compute(self, model, test):
 
