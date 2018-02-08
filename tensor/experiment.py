@@ -11,24 +11,22 @@ class Experiment(object):
     self.train = train
     self.test = test
 
-    self.n_entities = entities
-    self.n_relations = relations
+    self.entities = entities
+    self.relations = relations
 
     self.scorer = Scorer(train, test)
     self.model = vars(models)[param.model]()
+    self.results = Results()
     self.param = param
 
-    self.results = Results()
-
   def induce(self):
-    print("Inducing")
 
-    self.model.fit(self.train, self.param, self.n_entities, self.n_relations, 
+    print("Inducing")
+    self.model.fit(self.train, self.param, self.entities, self.relations, 
       self.scorer)
 
   def evaluate(self):
-    print("Evaluating")
 
+    print("Evaluating")
     res = self.scorer.compute(self.model, self.test)
-    self.results.add(res)
-    self.results.measures()
+    self.results.measures(res)
