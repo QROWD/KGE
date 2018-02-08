@@ -13,12 +13,11 @@ class Model(object):
   def __init__(self):
     self.name = self.__class__.__name__
 
-    self.pred_func = None
-    self.pred_func_compiled = None
+    self.pred = None
+    self.pred_compiled = None
 
-    self.loss_func = None
-    self.regul_func = None
-    self.loss_to_opt = None
+    self.regul = None
+    self.loss_opt = None
     
     self.ys = T.vector('ys')
     self.rows = T.lvector('rows')
@@ -41,8 +40,8 @@ class Model(object):
 
   def batch(self, train, param):
 
-    train_batch = Batch_Loader(train, n_entities=self.n, 
-      batch_size=param.batch_size, neg_ratio=param.neg_ratio)
+    train_batch = Batch(train, n_entities=self.n, 
+      bsize=param.bsize, neg_ratio=param.neg_ratio)
 
     inputs = [self.ys, self.rows, self.cols, self.tubes]
     return train_batch, inputs
@@ -52,12 +51,12 @@ class Model(object):
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
-  def setup(self,train, param):
+  def setup(self, train, param):
 
     self.allocate()
     self.define_loss()
-    self.pred_func_compiled = theano.function(self.get_pred_symb_vars(), self.pred_func)
-    self.loss_to_opt = self.loss + param.lmbda * self.regul_func
+    self.pred_compiled = theano.function(self.get_pred_symb_vars(), self.pred)
+    self.loss_opt = self.loss + param.lmbda * self.regul
 
   def fit(self, train, param, n, m, scorer):
 
@@ -65,7 +64,7 @@ class Model(object):
     self.setup(train, param)
     
     train_vals, train_symbs = self.batch(train, param)
-    opt = downhill.build(param.sgd, loss=self.loss_to_opt, 
+    opt = downhill.build(param.sgd, loss=self.loss_opt, 
       inputs=train_symbs, monitor_gradients=True)
 
     train_vals = downhill.Dataset(train_vals, name='train')
@@ -83,7 +82,7 @@ class Model(object):
         break
 
   def predict(self, test_idxs):
-    return self.pred_func_compiled(*self.get_pred_args(test_idxs))
+    return self.pred_compiled(*self.get_pred_args(test_idxs))
 
   def tensors(self):
     pass
@@ -110,12 +109,12 @@ class Polyadic(Model):
 
   def define_loss(self):
 
-    self.pred_func = T.sum(self.u[self.rows,:] * self.v[self.cols,:] * 
+    self.pred = T.sum(self.u[self.rows,:] * self.v[self.cols,:] * 
       self.w[self.tubes,:], 1)
 
-    self.loss = T.sqr(self.ys - self.pred_func).mean()
+    self.loss = T.sqr(self.ys - self.pred).mean()
 
-    self.regul_func = T.sqr(self.u[self.rows,:]).mean() \
+    self.regul = T.sqr(self.u[self.rows,:]).mean() \
       + T.sqr(self.v[self.cols,:]).mean() \
       + T.sqr(self.w[self.tubes,:]).mean()
 
@@ -152,7 +151,7 @@ class Complex(Model):
 
   def define_loss(self):
 
-    self.pred_func = T.sum(self.e1[self.rows,:] * 
+    self.pred = T.sum(self.e1[self.rows,:] * 
       self.r1[self.cols,:] * self.e1[self.tubes,:], 1) \
        + T.sum(self.e2[self.rows,:] * self.r1[self.cols,:] * 
       self.e2[self.tubes,:], 1) \
@@ -161,9 +160,9 @@ class Complex(Model):
        - T.sum(self.e2[self.rows,:] * self.r2[self.cols,:] * 
         self.e1[self.tubes,:], 1)
 
-    self.loss = T.sqr(self.ys - self.pred_func).mean()
+    self.loss = T.sqr(self.ys - self.pred).mean()
 
-    self.regul_func = T.sqr(self.e1[self.rows,:]).mean() \
+    self.regul = T.sqr(self.e1[self.rows,:]).mean() \
       + T.sqr(self.e2[self.rows,:]).mean() \
       + T.sqr(self.e1[self.tubes,:]).mean() \
       + T.sqr(self.e2[self.tubes,:]).mean() \
@@ -202,12 +201,12 @@ class DistMult(Model):
 
   def define_loss(self):
 
-    self.pred_func = T.sum(self.e[self.rows,:] * self.r[self.cols,:] * 
+    self.pred = T.sum(self.e[self.rows,:] * self.r[self.cols,:] * 
       self.e[self.tubes,:], 1)
 
-    self.loss = T.sqr(self.ys - self.pred_func).mean()
+    self.loss = T.sqr(self.ys - self.pred).mean()
 
-    self.regul_func = T.sqr(self.e[self.rows,:]).mean() \
+    self.regul = T.sqr(self.e[self.rows,:]).mean() \
       + T.sqr(self.r[self.cols,:]).mean() \
       + T.sqr(self.e[self.tubes,:]).mean()
 
@@ -230,45 +229,44 @@ class TransE(Model):
     self.e = None
     self.r = None
 
-    self.batch_size = None
+    self.bsize = None
     self.neg_ratio = None
 
   def tensors(self):
     params = {'e': randn(max(self.n, self.l), self.k),
-              'r': L2_proj(randn(self.m, self.k))}
+              'r': L2(randn(self.m, self.k))}
     return params
 
   def setup(self, train, param):
-    self.batch_size = param.batch_size
-    self.neg_ratio = float(param.neg_ratio)
+    self.bsize = param.bsize
+    self.neg_ratio = param.neg_ratio
     self.margin = param.lmbda
 
     super(TransE, self).setup(train, param)
 
   def batch(self, train, param):
 
-    train = TransE_Batch_Loader(self, train, n_entities = max(self.n,self.l), batch_size = param.batch_size,
-         neg_ratio = param.neg_ratio, contiguous_sampling = False)  
+    train = TransE_Batch(self, train, entities=max(self.n,self.l), 
+      bsize=param.bsize, neg_ratio=param.neg_ratio)
     inputs=[self.rows, self.cols, self.tubes]
-
     return train, inputs
 
   def define_loss(self):
 
-    self.pred_func = - T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
+    self.pred = - T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
       self.r[self.cols,:] - self.e[self.tubes,:]),1))
 
     self.loss = T.maximum( 0, self.margin + 
-      T.sqrt(T.sum(T.sqr(self.e[self.rows[:self.batch_size],:] + 
-        self.r[self.cols[:self.batch_size],:] - 
-        self.e[self.tubes[:self.batch_size],:]),1) ) \
-      - (1.0/self.neg_ratio) * 
-      T.sum(T.sqrt(T.sum(T.sqr(self.e[self.rows[self.batch_size:],:] + 
-        self.r[self.cols[self.batch_size:],:] - 
-        self.e[self.tubes[self.batch_size:],:]),1)).
-      reshape((int(self.batch_size),int(self.neg_ratio))),1) ).mean()
+      T.sqrt(T.sum(T.sqr(self.e[self.rows[:self.bsize],:] + 
+        self.r[self.cols[:self.bsize],:] - 
+        self.e[self.tubes[:self.bsize],:]),1) ) \
+      - (1.0/float(self.neg_ratio)) * 
+      T.sum(T.sqrt(T.sum(T.sqr(self.e[self.rows[self.bsize:],:] + 
+        self.r[self.cols[self.bsize:],:] - 
+        self.e[self.tubes[self.bsize:],:]),1)).
+      reshape((int(self.bsize),self.neg_ratio)),1) ).mean()
 
-    self.regul_func = 0
+    self.regul = 0
 
   def eval_o(self, i, j):
     e = self.e.get_value(borrow=True)
