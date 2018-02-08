@@ -21,16 +21,16 @@ class Results(object):
 
     mrr = np.mean([res.mrr for res in self.res])
     raw_mrr = np.mean([res.raw_mrr for res in self.res])
-    ranks_list = [res.ranks for res in self.res]
+    rank = [res.ranks for res in self.res]
 
-    hits1 = np.mean([(np.sum(ranks <= 1)) / float(len(ranks)) for ranks in ranks_list])
-    hits3 = np.mean([(np.sum(ranks <= 3)) / float(len(ranks)) for ranks in ranks_list])
-    hits10= np.mean([(np.sum(ranks <= 10))/ float(len(ranks)) for ranks in ranks_list])
+    h1 = np.mean([(np.sum(r <= 1)) / float(len(r)) for r in rank])
+    h3 = np.mean([(np.sum(r <= 3)) / float(len(r)) for r in rank])
+    h10= np.mean([(np.sum(r <= 10))/ float(len(r)) for r in rank])
 
     print("MRR\tRMRR\tH@1\tH@3\tH@10")
-    print("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % (mrr, raw_mrr, hits1, hits3, hits10))
+    print("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % (mrr, raw_mrr, h1, h3, h10))
 
-    return (mrr, raw_mrr, hits1, hits3, hits10)
+    return (mrr, raw_mrr, h1, h3, h10)
 
 class Scorer(object):
 
@@ -57,19 +57,18 @@ class Scorer(object):
   def compute(self, model, test):
 
     nb_test = len(test.values)
-    ranks = np.empty(2 * nb_test)
-    raw_ranks = np.empty(2 * nb_test)
+    nrank = np.empty(2*nb_test)
+    rrank = np.empty(2*nb_test)
 
     for a, (i, j, k) in enumerate(test.indexes):
 
       res_obj = model.eval_o(i, j)
-      raw_ranks[a] = 1 + np.sum(res_obj > res_obj[k])
-      ranks[a] = raw_ranks[a] - np.sum(res_obj[self.obj[(i,j)]] > res_obj[k])
+      rrank[a] = 1 + np.sum(res_obj > res_obj[k])
+      nrank[a] = rrank[a] - np.sum(res_obj[self.obj[(i,j)]] > res_obj[k])
 
       res_sub = model.eval_s(j, k)
+      rrank[nb_test + a] = 1 + np.sum(res_sub > res_sub[i])
+      nrank[nb_test + a] = rrank[nb_test + a] - np.sum(
+        res_sub[self.sub[(j,k)]] > res_sub[i])
 
-      raw_ranks[nb_test + a] = 1 + np.sum( res_sub > res_sub[i] )
-      ranks[nb_test + a] = raw_ranks[nb_test + a] - np.sum(
-        res_sub[self.sub[(j,k)]] > res_sub[i] )
-
-    return Result(ranks, raw_ranks)
+    return Result(nrank, rrank)

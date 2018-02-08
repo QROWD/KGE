@@ -28,6 +28,7 @@ class Experiment(object):
 
   def evaluate(self):
     print("Evaluating")
+
     res = self.scorer.compute(self.model, self.test)
     self.results.add(res)
     self.results.measures()

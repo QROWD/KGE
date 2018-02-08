@@ -1,14 +1,12 @@
-import downhill
 import theano
 import theano.tensor as T
+import downhill
 
 from batching import * 
 from evaluation import *
 from tools import *
 
 theano.config.floatX = 'float32'
-#theano.config.mode = 'FAST_RUN'
-#theano.config.exception_verbosity = 'high'
 
 class Model(object):
 
@@ -61,7 +59,6 @@ class Model(object):
     self.pred_func_compiled = theano.function(self.get_pred_symb_vars(), self.pred_func)
     self.loss_to_opt = self.loss + param.lmbda * self.regul_func
 
-
   def fit(self, train, param, n, m, scorer):
 
     self.n, self.m, self.l, self.k = n, m, n, param.k
@@ -71,7 +68,7 @@ class Model(object):
     opt = downhill.build(param.sgd, loss=self.loss_to_opt, 
       inputs=train_symbs, monitor_gradients=True)
 
-    train_vals = downhill.Dataset(train_vals, name = 'train')
+    train_vals = downhill.Dataset(train_vals, name='train')
 
     it = 1
     for _ in opt.iterate(train_vals, None,
