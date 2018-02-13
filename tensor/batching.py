@@ -2,10 +2,10 @@ from tools import *
 
 class Batch(object):
 
-  def __init__(self, positive, n_entities, bsize=100, neg_ratio=10):
+  def __init__(self, positive, entities, bsize=100, neg_ratio=10):
     self.positive = positive
     self.bsize = bsize
-    self.entities = n_entities
+    self.entities = entities
     self.neg_ratio = neg_ratio
     self.idx = 0
 
@@ -45,19 +45,13 @@ class Batch(object):
     return train
 
 
-
 class TransE_Batch(Batch):
-  #Hacky trick to normalize embeddings at each update
-  def __init__(self, model, positive, entities, bsize=100, neg_ratio = 0.0):
-    super(TransE_Batch, self).__init__(positive, entities, bsize, neg_ratio)
 
+  def __init__(self, model, positive, entities, bsize, neg_ratio):
+    super(TransE_Batch, self).__init__(positive, entities, bsize, neg_ratio)
     self.model = model
 
   def __call__(self):
-    train = super(TransE_Batch, self).__call__()
-    train = train[1:]
-
-    #Projection on L2 sphere before each batch
-    self.model.e.set_value(L2(self.model.e.get_value(borrow = True)), borrow = True)
-
+    train = super(TransE_Batch, self).__call__()[1:]
+    self.model.e.set_value(L2(self.model.e.get_value(borrow=True)), borrow=True)
     return train
