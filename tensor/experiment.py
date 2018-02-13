@@ -22,8 +22,7 @@ class Experiment(object):
   def induce(self):
 
     print("Inducing")
-    self.model.fit(self.train, self.param, self.entities, self.relations, 
-      self.scorer)
+    self.model.fit(self.train, self.entities, self.relations, self.param)
 
   def evaluate(self):
 
