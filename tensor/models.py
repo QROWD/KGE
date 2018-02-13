@@ -32,17 +32,16 @@ class Model(object):
     self.l = max(train.indexes[:,2]) + 1
     self.k = param.k
 
-  def get_pred_symb_vars(self):
+  def pred_symb_vars(self):
     return [self.rows, self.cols, self.tubes]
 
-  def get_pred_args(self, test):
+  def pred_args(self, test):
     return [test[:,0], test[:,1], test[:,2]]
 
   def batch(self, train, param):
 
-    train_batch = Batch(train, n_entities=self.n, 
-      bsize=param.bsize, neg_ratio=param.neg_ratio)
-
+    train_batch = Batch(train, entities=self.n, bsize=param.bsize, 
+      neg_ratio=param.neg_ratio)
     inputs = [self.ys, self.rows, self.cols, self.tubes]
     return train_batch, inputs
 
@@ -55,25 +54,25 @@ class Model(object):
 
     self.allocate()
     self.define_loss()
-    self.pred_compiled = theano.function(self.get_pred_symb_vars(), self.pred)
+    self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
     self.loss_opt = self.loss + param.lmbda * self.regul
 
-  def fit(self, train, param, n, m, scorer):
+  def fit(self, train, entities, relations, param):
 
-    self.n, self.m, self.l, self.k = n, m, n, param.k
+    self.n, self.m, self.l, self.k = entities, relations, entities, param.k
     self.setup(train, param)
-    
-    train_vals, train_symbs = self.batch(train, param)
-    opt = downhill.build(param.sgd, loss=self.loss_opt, 
-      inputs=train_symbs, monitor_gradients=True)
 
-    train_vals = downhill.Dataset(train_vals, name='train')
+    vals, symbs = self.batch(train, param)
+    opt = downhill.build(param.sgd, loss=self.loss_opt, inputs=symbs, 
+      monitor_gradients=True)
+
+    vals = downhill.Dataset(vals, name='train')
 
     it = 1
-    for _ in opt.iterate(train_vals, None,
+    for _ in opt.iterate(vals, None,
       max_updates=param.epoch,
-      validate_every=9999999,
-      patience=9999999,
+      validate_every=9999,
+      patience=9999,
       max_gradient_norm=1,
       learning_rate=param.lr):
 
@@ -82,7 +81,7 @@ class Model(object):
         break
 
   def predict(self, test_idxs):
-    return self.pred_compiled(*self.get_pred_args(test_idxs))
+    return self.pred_compiled(*self.pred_args(test_idxs))
 
   def tensors(self):
     pass
@@ -246,10 +245,10 @@ class TransE(Model):
 
   def batch(self, train, param):
 
-    train = TransE_Batch(self, train, entities=max(self.n,self.l), 
-      bsize=param.bsize, neg_ratio=param.neg_ratio)
-    inputs=[self.rows, self.cols, self.tubes]
-    return train, inputs
+    train_batch = TransE_Batch(self, train, entities=self.n, bsize=param.bsize, 
+      neg_ratio=param.neg_ratio)
+    inputs = [self.rows, self.cols, self.tubes]
+    return train_batch, inputs
 
   def define_loss(self):
 
