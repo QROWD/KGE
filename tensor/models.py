@@ -40,10 +40,10 @@ class Model(object):
 
   def batch(self, train, param):
 
-    train_batch = Batch(train, entities=self.n, bsize=param.bsize, 
+    batch = Batch(train, entities=self.n, bsize=param.bsize, 
       neg_ratio=param.neg_ratio)
     inputs = [self.ys, self.rows, self.cols, self.tubes]
-    return train_batch, inputs
+    return batch, inputs
 
   def allocate(self):
     params = self.tensors()
@@ -53,7 +53,7 @@ class Model(object):
   def setup(self, train, param):
 
     self.allocate()
-    self.define_loss()
+    self.lossfun()
     self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
     self.loss_opt = self.loss + param.lmbda * self.regul
 
@@ -86,7 +86,7 @@ class Model(object):
   def tensors(self):
     pass
 
-  def define_loss(self):
+  def lossfun(self):
     pass
 
 class Polyadic(Model):
@@ -106,7 +106,7 @@ class Polyadic(Model):
               'w': randn(max(self.n,self.l),self.k)}
     return params
 
-  def define_loss(self):
+  def lossfun(self):
 
     self.pred = T.sum(self.u[self.rows,:] * self.v[self.cols,:] * 
       self.w[self.tubes,:], 1)
@@ -117,13 +117,13 @@ class Polyadic(Model):
       + T.sqr(self.v[self.cols,:]).mean() \
       + T.sqr(self.w[self.tubes,:]).mean()
 
-  def eval_o(self, i, j):
+  def objects(self, i, j):
     u = self.u.get_value(borrow=True)
     v = self.v.get_value(borrow=True)
     w = self.w.get_value(borrow=True)
     return (u[i,:] * v[j,:]).dot(w.T)
 
-  def eval_s(self, j, k):
+  def subjects(self, j, k):
     u = self.u.get_value(borrow=True)
     v = self.v.get_value(borrow=True)
     w = self.w.get_value(borrow=True)
@@ -148,7 +148,7 @@ class Complex(Model):
               'r2': randn(self.m,self.k)}
     return params
 
-  def define_loss(self):
+  def lossfun(self):
 
     self.pred = T.sum(self.e1[self.rows,:] * 
       self.r1[self.cols,:] * self.e1[self.tubes,:], 1) \
@@ -168,7 +168,7 @@ class Complex(Model):
       + T.sqr(self.r1[self.cols,:]).mean() \
       + T.sqr(self.r2[self.cols,:]).mean()
 
-  def eval_o(self, i, j):
+  def objects(self, i, j):
     e1 = self.e1.get_value(borrow=True)
     r1 = self.r1.get_value(borrow=True)
     e2 = self.e2.get_value(borrow=True)
@@ -176,7 +176,7 @@ class Complex(Model):
     return ((e1[i,:] * r1[j,:]).dot(e1.T) + (e2[i,:] * r1[j,:]).dot(e2.T) + 
       (e1[i,:] * r2[j,:]).dot(e2.T) - (e2[i,:] * r2[j,:]).dot(e1.T))
 
-  def eval_s(self, j, k):
+  def subjects(self, j, k):
     e1 = self.e1.get_value(borrow=True)
     r1 = self.r1.get_value(borrow=True)
     e2 = self.e2.get_value(borrow=True)
@@ -198,7 +198,7 @@ class DistMult(Model):
               'r': randn(self.m, self.k)}
     return params
 
-  def define_loss(self):
+  def lossfun(self):
 
     self.pred = T.sum(self.e[self.rows,:] * self.r[self.cols,:] * 
       self.e[self.tubes,:], 1)
@@ -209,12 +209,12 @@ class DistMult(Model):
       + T.sqr(self.r[self.cols,:]).mean() \
       + T.sqr(self.e[self.tubes,:]).mean()
 
-  def eval_o(self, i, j):
+  def objects(self, i, j):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
     return (e[i,:] * r[j,:]).dot(e.T)
 
-  def eval_s(self, j, k):
+  def subjects(self, j, k):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
     return e.dot(r[j,:] * e[k,:])
@@ -228,51 +228,28 @@ class TransE(Model):
     self.e = None
     self.r = None
 
-    self.bsize = None
-    self.neg_ratio = None
-
   def tensors(self):
     params = {'e': randn(max(self.n, self.l), self.k),
               'r': L2(randn(self.m, self.k))}
     return params
 
-  def setup(self, train, param):
-    self.bsize = param.bsize
-    self.neg_ratio = param.neg_ratio
-    self.margin = param.lmbda
+  def lossfun(self):
 
-    super(TransE, self).setup(train, param)
-
-  def batch(self, train, param):
-
-    train_batch = TransE_Batch(self, train, entities=self.n, bsize=param.bsize, 
-      neg_ratio=param.neg_ratio)
-    inputs = [self.rows, self.cols, self.tubes]
-    return train_batch, inputs
-
-  def define_loss(self):
+    self.e.set_value(L2(self.e.get_value(borrow=True)), borrow=True)
 
     self.pred = - T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
-      self.r[self.cols,:] - self.e[self.tubes,:]),1))
+      self.r[self.cols,:] - self.e[self.tubes,:]), 1))
 
-    self.loss = T.maximum( 0, self.margin + 
-      T.sqrt(T.sum(T.sqr(self.e[self.rows[:self.bsize],:] + 
-        self.r[self.cols[:self.bsize],:] - 
-        self.e[self.tubes[:self.bsize],:]),1) ) \
-      - (1.0/float(self.neg_ratio)) * 
-      T.sum(T.sqrt(T.sum(T.sqr(self.e[self.rows[self.bsize:],:] + 
-        self.r[self.cols[self.bsize:],:] - 
-        self.e[self.tubes[self.bsize:],:]),1)).
-      reshape((int(self.bsize),self.neg_ratio)),1) ).mean()
+    self.loss = T.sqr(self.ys - self.pred).mean()
 
     self.regul = 0
 
-  def eval_o(self, i, j):
+  def objects(self, i, j):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
-    return - np.sum(np.square((e[i,:] + r[j,:]) - e ),1)
+    return - np.sum(np.square((e[i,:] + r[j,:]) - e), 1)
 
-  def eval_s(self, j, k):
+  def subjects(self, j, k):
     e = self.e.get_value(borrow=True)
     r = self.r.get_value(borrow=True)
-    return - np.sum(np.square(e + (r[j,:] - e[k,:]) ),1)
+    return - np.sum(np.square(e + (r[j,:] - e[k,:])), 1)
