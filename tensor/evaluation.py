@@ -49,11 +49,11 @@ class Scorer(object):
 
     for a, (i, j, k) in enumerate(test.indexes):
 
-      res_obj = model.eval_o(i, j)
+      res_obj = model.objects(i, j)
       rrank[a] = 1 + np.sum(res_obj > res_obj[k])
       nrank[a] = rrank[a] - np.sum(res_obj[self.obj[(i,j)]] > res_obj[k])
 
-      res_sub = model.eval_s(j, k)
+      res_sub = model.subjects(j, k)
       rrank[nb_test + a] = 1 + np.sum(res_sub > res_sub[i])
       nrank[nb_test + a] = rrank[nb_test + a] - np.sum(
         res_sub[self.sub[(j,k)]] > res_sub[i])
