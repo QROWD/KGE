@@ -44,14 +44,3 @@ class Batch(object):
 
     return train
 
-
-class TransE_Batch(Batch):
-
-  def __init__(self, model, positive, entities, bsize, neg_ratio):
-    super(TransE_Batch, self).__init__(positive, entities, bsize, neg_ratio)
-    self.model = model
-
-  def __call__(self):
-    train = super(TransE_Batch, self).__call__()[1:]
-    self.model.e.set_value(L2(self.model.e.get_value(borrow=True)), borrow=True)
-    return train
