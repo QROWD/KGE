@@ -33,12 +33,15 @@ if __name__ == "__main__":
     help='Set the random seed (default: 1234')
 
   args = parser.parse_args()
-
   np.random.seed(args.rand)
 
-  path = os.path.dirname(os.path.realpath( os.path.basename(__file__)))
-  data, entities, relations = load(path, args.data + ".txt")
-  train, test = kcv(data, args.folds)
+  path = os.path.dirname(os.path.realpath(os.path.basename(__file__)))
+
+  if(args.folds != 0):
+    data, entities, relations = original(path + 'datasets/', args.data)
+    train, test = kcv(data, args.folds)
+  else:
+    train, test, entities, relations = splitted(path + 'datasets/', args.data)
 
   print("Nb entities: " + str(entities))
   print("Nb relations: " + str(relations))
