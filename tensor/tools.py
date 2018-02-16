@@ -1,4 +1,4 @@
-import sys,os
+import sys, os
 import numpy as np
 
 def randn(*args):
@@ -12,6 +12,7 @@ def L2(M):
 class Triples(object):
 
   def __init__(self, data):
+    data = dict(data)
     self.indexes = np.array(data.keys()).astype(np.int64)
     self.values = np.array(data.values()).astype(np.float32)
 
