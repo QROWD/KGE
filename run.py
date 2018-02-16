@@ -8,11 +8,11 @@ from tensor.read import *
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(
-    description='Link Prediction Experiment with Negative Sampling'
+    description='Avoiding False Negative Samples on Link Prediction'
   )
 
   parser.add_argument('--model', metavar='', 
-    help='model to run: {Complex, DistMult, Polyadic, TransE}')
+    help='model to run: {Complex, CP, DistMult, TransE}')
   parser.add_argument('--lmbda', type=float, default=0.1, metavar='', 
     help='value of lambda  (default: 0.1)')
   parser.add_argument('--data', metavar='', 
@@ -32,16 +32,16 @@ if __name__ == "__main__":
   parser.add_argument('--rand', default=1234, type=int, metavar='',
     help='Set the random seed (default: 1234')
 
+  path = os.path.dirname(os.path.realpath(os.path.basename(__file__)))
+
   args = parser.parse_args()
   np.random.seed(args.rand)
 
-  path = os.path.dirname(os.path.realpath(os.path.basename(__file__)))
-
-  if(args.folds != 0):
-    data, entities, relations = original(path + 'datasets/', args.data)
-    train, test = kcv(data, args.folds)
+  if(args.folds == 1):
+    data, train, test, entities, relations = splitted(path, args.data)
   else:
-    train, test, entities, relations = splitted(path + 'datasets/', args.data)
+    data, entities, relations = original(path, args.data)
+    train, test = kcv(data, args.folds)
 
   print("Nb entities: " + str(entities))
   print("Nb relations: " + str(relations))

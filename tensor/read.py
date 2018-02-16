@@ -20,20 +20,21 @@ def byIndex(table, entities, relations):
 
 def splitted(path, file):
 
-  aux = read(path + 'splitted/' + file + '.train.txt')
-  tmp = read(path + 'splitted/' + file + '.test.txt')
+  aux = read(path + '/datasets/' + file + '.train.txt')
+  tmp = read(path + '/datasets/' + file + '.test.txt')
 
+  data = np.concatenate((aux, tmp), axis=0)
   entities = (np.unique(aux[1] + tmp[1])).tolist()
   relations = (np.unique(aux[2] + tmp[2])).tolist()
 
-  train = byIndex(aux[0], entities, relations)
-  test  = byIndex(tmp[0], entities, relations)
-  return [train], [test], len(entities), len(relations)
+  train = Triples(byIndex(aux[0], entities, relations))
+  test  = Triples(byIndex(tmp[0], entities, relations))
+  return data, [train], [test], len(entities), len(relations)
 
 def original(path, file):
 
-  data, entities, relations = read(path + 'original/' + file + '.txt')
-  data = byIndex(data, entities, relations)
+  table, entities, relations = read(path + '/datasets/' + file + '.txt')
+  data = byIndex(table, entities, relations)
   return data, len(entities), len(relations)
 
 def kcv(data, folds=10):
@@ -41,9 +42,6 @@ def kcv(data, folds=10):
   idx = np.repeat(range(folds), int(len(data)/folds))
   data = data[0:len(idx),:]
 
-  train = [dict(data[(idx != i),:]) for i in range(folds)]
-  test = [dict(data[idx == i,:]) for i in range(folds)]
-
-  train = [Triples(i) for i in train]
-  test = [Triples(i) for i in test]
+  train = [Triples(data[(idx != i),:]) for i in range(folds)]
+  test = [Triples(data[idx == i,:]) for i in range(folds)]
   return train, test
