@@ -89,10 +89,10 @@ class Model(object):
   def lossfun(self):
     pass
 
-class Polyadic(Model):
+class CP(Model):
 
   def __init__(self):
-    super(Polyadic, self).__init__()
+    super(CP, self).__init__()
     self.name = self.__class__.__name__
 
     self.u = None
@@ -150,14 +150,14 @@ class Complex(Model):
 
   def lossfun(self):
 
-    self.pred = T.sum(self.e1[self.rows,:] * 
-      self.r1[self.cols,:] * self.e1[self.tubes,:], 1) \
-       + T.sum(self.e2[self.rows,:] * self.r1[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-       + T.sum(self.e1[self.rows,:] * self.r2[self.cols,:] * 
-      self.e2[self.tubes,:], 1) \
-       - T.sum(self.e2[self.rows,:] * self.r2[self.cols,:] * 
-        self.e1[self.tubes,:], 1)
+    self.pred = T.sum(self.e1[self.rows,:] \
+        * self.r1[self.cols,:] * self.e1[self.tubes,:], 1) \
+      + T.sum(self.e2[self.rows,:] * self.r1[self.cols,:] \
+        * self.e2[self.tubes,:], 1) \
+      + T.sum(self.e1[self.rows,:] * self.r2[self.cols,:] \
+        * self.e2[self.tubes,:], 1) \
+      - T.sum(self.e2[self.rows,:] * self.r2[self.cols,:] \
+        * self.e1[self.tubes,:], 1)
 
     self.loss = T.sqr(self.ys - self.pred).mean()
 
@@ -242,7 +242,9 @@ class TransE(Model):
 
     self.loss = T.sqr(self.ys - self.pred).mean()
 
-    self.regul = 0
+    self.regul = T.sqr(self.e[self.rows,:]).mean() \
+      + T.sqr(self.r[self.cols,:]).mean() \
+      + T.sqr(self.e[self.tubes,:]).mean()
 
   def objects(self, i, j):
     e = self.e.get_value(borrow=True)
