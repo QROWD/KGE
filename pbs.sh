@@ -1,5 +1,5 @@
 #PBS -l select=1:ngpus=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=336:00:00
 
 module load gcc
 module load python
