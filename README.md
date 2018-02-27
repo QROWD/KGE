@@ -13,7 +13,7 @@ pip install downhill theano
 
 ## Example of use
 
-The simplest way to execute the KGE techniques is:
+The code can be executed in the x86 or using GPUs. For execute the code using GPUs you need to add the flag `DEVICE=cuda0` before call the execution line. The simplest way to execute the KGE techniques is:
 
 ```
 DEVICE=cuda0 python run.py --model Complex --data wn18 --k 100 --epoch 1000 --folds 5
