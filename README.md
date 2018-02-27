@@ -8,7 +8,6 @@ The code depends on Downhill and Theano packages. Install it, along with other d
 
 ```
 pip install downhill theano
-
 ```
 
 ## Example of use
@@ -17,7 +16,6 @@ The simplest way to execute the KGE techniques is:
 
 ```
 python run.py --model Complex --data wn18 --k 100 --epoch 1000 --folds 5
-
 ```
 
 ## Add your own data
