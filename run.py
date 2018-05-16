@@ -15,8 +15,7 @@ if __name__ == "__main__":
     help='model to run: {Complex, CP, DistMult, TransE}')
   parser.add_argument('--lmbda', type=float, default=0.1, metavar='', 
     help='value of lambda  (default: 0.1)')
-  parser.add_argument('--data', metavar='', 
-    help='dataset to be used: {wn18, fb15k, yago3, ml100k, kinship}')
+  parser.add_argument('--data', metavar='', help='dataset to be used')
   parser.add_argument('--k', type=int, default=50, metavar='', 
     help='embedding size (default: 50)')
   parser.add_argument('--lr', type=float, default=0.5, metavar='', 
