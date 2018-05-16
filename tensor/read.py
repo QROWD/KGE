@@ -4,7 +4,7 @@ from experiment import *
 
 def read(filename, split="\t"):
 
-  data = np.genfromtxt(filename, delimiter=split, dtype='|S146')
+  data = np.genfromtxt(filename, delimiter=split, dtype='string', comments=None)
   entities = (np.unique((data[:,0], data[:,2]))).tolist()
   relations = (np.unique(data[:,1])).tolist()
   return data, entities, relations
