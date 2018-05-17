@@ -6,7 +6,7 @@ The Knowledge Graph Embedding (KGE) repository is a implementation of the state 
 
 The code depends on Downhill and Theano packages. Install it, along with other dependencies with:
 
-```python
+```
 pip install downhill theano
 ```
 
@@ -14,7 +14,7 @@ pip install downhill theano
 
 The simplest way to generate and evaluate the models is calling the `run.py` script. The `model` parameter is the techniques available, `data` is the name of the dataset to be executed, `k` is the dimension of the embedding vectors, `epoch` is the number of epochs to be executed and `folds` is the number of folds used in the k-fold cross-validation technique. The simplest way to execute the KGE techniques is:
 
-```python
+```
 python run.py evaluation --model Complex --data bicycleparking --k 100 --epoch 1000 --folds 5
 ```
 
