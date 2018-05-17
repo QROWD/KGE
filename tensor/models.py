@@ -184,6 +184,42 @@ class Complex(Model):
     return (e1.dot(r1[j,:] * e1[k,:]) + e2.dot(r1[j,:] * e2[k,:]) + 
       e1.dot(r2[j,:] * e2[k,:]) - e2.dot(r2[j,:] * e1[k,:]))
 
+class Rescal(Model):
+
+  def __init__(self):
+    super(Rescal, self).__init__()
+    self.name = self.__class__.__name__
+
+    self.r = None
+    self.e = None
+
+  def tensors(self):
+
+    params = {'r' : randn(self.m, self.k, self.k),
+              'e' : randn(max(self.n,self.l),self.k)}
+    return params
+
+  def lossfun(self):
+
+    self.pred = T.sum(T.sum(self.e[self.rows,:,None] * 
+      self.r[self.cols,:,:], 1) *  self.e[self.tubes,:], 1)
+
+    self.loss = T.sqr(self.ys - self.pred).mean()
+
+    self.regul = T.sqr(self.e[self.rows,:]).mean() \
+            + T.sqr(self.r[self.cols,:,:]).mean() \
+            + T.sqr(self.e[self.tubes,:]).mean()
+
+  def objects(self, i, j):
+    e = self.e.get_value(borrow=True)
+    r = self.r.get_value(borrow=True)
+    return (e[i,:].dot(r[j,:,:])).dot(e.T)
+
+  def subjects(self, j, k):
+    e = self.e.get_value(borrow=True)
+    r = self.r.get_value(borrow=True)
+    return e.dot(r[j,:,:].dot(e[k,:]))
+
 class DistMult(Model):
 
   def __init__(self):
