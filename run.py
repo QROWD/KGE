@@ -64,14 +64,8 @@ if __name__ == "__main__":
       exp.evaluate()
       model.append(exp)
 
-    acc = idx = 0
-    for i in range(len(model)):
-      if(acc < model[i].results.res[0].mrr):
-        acc = model[i].results.res[0].mrr
-        idx = i
-
     with open("model.txt", "wb") as fp:
-      pickle.dump(model[idx], fp)
+      pickle.dump(best(model), fp)
 
   else: 
     print(0)

@@ -9,6 +9,16 @@ def L2(M):
   M /=  norm_M[:, None]
   return M
 
+def best(model)
+
+  acc = idx = 0
+  for i in range(len(model)):
+    if(acc < model[i].results.res[0].mrr):
+      acc = model[i].results.res[0].mrr
+      idx = i
+
+  return model[idx]
+
 class Triples(object):
 
   def __init__(self, data):
