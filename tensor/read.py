@@ -29,13 +29,13 @@ def splitted(path, file):
 
   train = Triples(byIndex(aux[0], entities, relations))
   test  = Triples(byIndex(tmp[0], entities, relations))
-  return data, [train], [test], len(entities), len(relations)
+  return data, [train], [test], entities, relations
 
 def original(path, file):
 
   table, entities, relations = read(path + '/datasets/' + file + '.txt')
   data = byIndex(table, entities, relations)
-  return data, len(entities), len(relations)
+  return data, entities, relations
 
 def kcv(data, folds=10):
 

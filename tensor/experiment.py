@@ -11,8 +11,11 @@ class Experiment(object):
     self.train = train
     self.test = test
 
-    self.entities = entities
-    self.relations = relations
+    self.orig_entities = entities
+    self.orig_relations = relations
+
+    self.entities = len(entities)
+    self.relations = len(relations)
 
     self.scorer = Scorer(train, test)
     self.model = vars(models)[param.model]()

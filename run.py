@@ -1,16 +1,19 @@
 import sys, os
 import argparse
-
+import pickle
 import tensor
+
 import tensor.tools as tools
 from tensor.read import *
 
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(
-    description='Avoiding False Negative Samples on Link Prediction'
+    description='Knowledge Graph Embedding for Link Prediction'
   )
 
+  parser.add_argument('type', metavar='', 
+    help='Evaluate or predict the model: {evaluation, prediction}')
   parser.add_argument('--model', metavar='', 
     help='model to run: {Complex, CP, Rescal, DistMult, TransE}')
   parser.add_argument('--lmbda', type=float, default=0.1, metavar='', 
@@ -36,26 +39,42 @@ if __name__ == "__main__":
   args = parser.parse_args()
   np.random.seed(args.rand)
 
-  if(args.folds == 1):
-    data, train, test, entities, relations = splitted(path, args.data)
-  else:
-    data, entities, relations = original(path, args.data)
-    train, test = kcv(data, args.folds)
+  if(args.type == 'evaluation'):
 
-  print("Nb entities: " + str(entities))
-  print("Nb relations: " + str(relations))
-  print("Nb triples: " + str(len(data)))
-  print("Technique: " + str(args.model))
-  print("Learning rate: " + str(args.lr))
-  print("Max epochs: " + str(args.epoch))
-  print("Generated negatives ratio: " + str(args.negative))
-  print("Batch size: " + str(args.bsize))
+    if(args.folds == 1):
+      data, train, test, entities, relations = splitted(path, args.data)
+    else:
+      data, entities, relations = original(path, args.data)
+      train, test = kcv(data, args.folds)
 
-  param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr, 
-    epoch=args.epoch, bsize=args.bsize, negative=args.negative)
+    print("Nb entities: " + str(len(entities)))
+    print("Nb relations: " + str(len(relations)))
+    print("Nb triples: " + str(len(data)))
+    print("Technique: " + str(args.model))
+    print("Learning rate: " + str(args.lr))
+    print("Max epochs: " + str(args.epoch))
+    print("Generated negatives ratio: " + str(args.negative))
+    print("Batch size: " + str(args.bsize))
 
-  for i in range(args.folds):
-    print("Fold " + str(i+1) + ":")
-    model = Experiment(train[i], test[i], entities, relations, param)
-    model.induce()
-    model.evaluate()
+    param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr,
+      epoch=args.epoch, bsize=args.bsize, negative=args.negative)
+
+    model = []
+    for i in range(args.folds):
+      print("Fold " + str(i+1) + ":")
+      exp = Experiment(train[i], test[i], entities, relations, param)
+      exp.induce()
+      exp.evaluate()
+      model.append(exp)
+
+    acc = idx = 0
+    for i in range(len(model)):
+      if(acc < model[i].results.res[0].mrr):
+        acc = model[i].results.res[0].mrr
+        idx = i
+
+    with open("model.txt", "wb") as fp:
+      pickle.dump(model[idx], fp)
+
+  else: 
+    print(0)
