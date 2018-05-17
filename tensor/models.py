@@ -184,10 +184,10 @@ class Complex(Model):
     return (e1.dot(r1[j,:] * e1[k,:]) + e2.dot(r1[j,:] * e2[k,:]) + 
       e1.dot(r2[j,:] * e2[k,:]) - e2.dot(r2[j,:] * e1[k,:]))
 
-class Rescal(Model):
+class RESCAL(Model):
 
   def __init__(self):
-    super(Rescal, self).__init__()
+    super(RESCAL, self).__init__()
     self.name = self.__class__.__name__
 
     self.r = None

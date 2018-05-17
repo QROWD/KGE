@@ -15,7 +15,7 @@ if __name__ == "__main__":
   parser.add_argument('type', metavar='', 
     help='Evaluate or predict the model: {evaluation, prediction}')
   parser.add_argument('--model', metavar='', 
-    help='model to run: {Complex, CP, Rescal, DistMult, TransE}')
+    help='model to run: {Complex, CP, RESCAL, DistMult, TransE}')
   parser.add_argument('--lmbda', type=float, default=0.1, metavar='', 
     help='value of lambda  (default: 0.1)')
   parser.add_argument('--data', metavar='', help='dataset to be used')
