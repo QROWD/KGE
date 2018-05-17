@@ -18,22 +18,9 @@ def byIndex(table, entities, relations):
 
   return np.array(data.items())
 
-def splitted(path, file):
-
-  aux = read(path + '/datasets/' + file + '.train.txt')
-  tmp = read(path + '/datasets/' + file + '.test.txt')
-
-  data = np.concatenate((aux, tmp), axis=0)
-  entities = (np.unique(aux[1] + tmp[1])).tolist()
-  relations = (np.unique(aux[2] + tmp[2])).tolist()
-
-  train = Triples(byIndex(aux[0], entities, relations))
-  test  = Triples(byIndex(tmp[0], entities, relations))
-  return data, [train], [test], entities, relations
-
 def original(path, file):
 
-  table, entities, relations = read(path + '/datasets/' + file + '.txt')
+  table, entities, relations = read(path + '/datasets/' + file)
   data = byIndex(table, entities, relations)
   return data, entities, relations
 

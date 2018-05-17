@@ -41,11 +41,8 @@ if __name__ == "__main__":
 
   if(args.type == 'evaluation'):
 
-    if(args.folds == 1):
-      data, train, test, entities, relations = splitted(path, args.data)
-    else:
-      data, entities, relations = original(path, args.data)
-      train, test = kcv(data, args.folds)
+    data, entities, relations = original(path, args.data)
+    train, test = kcv(data, args.folds)
 
     print("Nb entities: " + str(len(entities)))
     print("Nb relations: " + str(len(relations)))
