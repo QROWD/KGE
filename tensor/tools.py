@@ -13,11 +13,25 @@ def best(model):
 
   acc = idx = 0
   for i in range(len(model)):
-    if(acc < model[i].results.res[0].mrr):
-      acc = model[i].results.res[0].mrr
+    if(acc < model[i].result[0]):
+      acc = model[i].result[0]
       idx = i
 
   return model[idx]
+
+def measures(ranks):
+
+  mrr = np.mean(1.0 / ranks)
+
+  h1  = (np.sum(ranks <= 1))  / float(len(ranks))
+  h3  = (np.sum(ranks <= 3))  / float(len(ranks))
+  h10 = (np.sum(ranks <= 10)) / float(len(ranks))
+
+  print("MRR\tH@1\tH@3\tH@10")
+  print("%0.3f\t%0.3f\t%0.3f\t%0.3f" % \
+    (mrr, h1, h3, h10))
+
+  return (mrr, h1, h3, h10)
 
 class Triples(object):
 
@@ -39,3 +53,4 @@ class Parameters(object):
     self.bsize = bsize
     self.neg_ratio = negative
     self.sgd = sgd
+
