@@ -39,19 +39,21 @@ if __name__ == "__main__":
   args = parser.parse_args()
   np.random.seed(args.rand)
 
+  table, entities, relations = read(path + '/datasets/' + args.data)
+
+  print("Nb entities: " + str(len(entities)))
+  print("Nb relations: " + str(len(relations)))
+  print("Nb triples: " + str(len(table)))
+  print("Technique: " + str(args.model))
+  print("Learning rate: " + str(args.lr))
+  print("Max epochs: " + str(args.epoch))
+  print("Generated negatives ratio: " + str(args.negative))
+  print("Batch size: " + str(args.bsize))
+
   if(args.type == 'evaluation'):
 
-    data, entities, relations = original(path, args.data)
+    data = byIndex(table, entities, relations)
     train, test = kfold(data, args.folds)
-
-    print("Nb entities: " + str(len(entities)))
-    print("Nb relations: " + str(len(relations)))
-    print("Nb triples: " + str(len(data)))
-    print("Technique: " + str(args.model))
-    print("Learning rate: " + str(args.lr))
-    print("Max epochs: " + str(args.epoch))
-    print("Generated negatives ratio: " + str(args.negative))
-    print("Batch size: " + str(args.bsize))
 
     param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr,
       epoch=args.epoch, bsize=args.bsize, negative=args.negative)
@@ -67,5 +69,10 @@ if __name__ == "__main__":
     with open("model.txt", "wb") as fp:
       pickle.dump(best(model), fp)
 
-  else: 
-    print(0)
+  else:
+
+    with open('model.txt', 'rb') as fp:
+      exp = pickle.load(fp)
+
+    test = Triples(byIndex(table, exp.orig_entities, exp.orig_relations))
+    res = exp.prediction(test)

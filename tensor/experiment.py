@@ -23,12 +23,15 @@ class Experiment(object):
     self.param = param
 
   def induce(self):
-
-    print("Inducing")
+    print("Induction")
     self.model.fit(self.train, self.entities, self.relations, self.param)
 
   def evaluate(self):
-
-    print("Evaluating")
-    res = self.scorer.compute(self.model, self.test)
+    print("Evaluation")
+    res = self.scorer.evaluate(self.model, self.test)
     self.results.measures(res)
+
+  def prediction(self, test):
+    print("Prediction")
+    res = self.scorer.predict(self.model, test)
+    return(res)

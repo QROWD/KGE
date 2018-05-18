@@ -29,12 +29,6 @@ def byIndex(table, entities, relations):
 
   return np.array(data.items())
 
-def original(path, file):
-
-  table, entities, relations = read(path + '/datasets/' + file)
-  data = byIndex(table, entities, relations)
-  return data, entities, relations
-
 def kfold(data, folds=10):
 
   idx = np.repeat(range(folds), int(len(data)/folds))

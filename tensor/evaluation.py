@@ -26,7 +26,8 @@ class Results(object):
     h10= np.mean([(np.sum(r <= 10))/ float(len(r)) for r in rank])
 
     print("MRR\tRMRR\tH@1\tH@3\tH@10")
-    print("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % (mrr, raw_mrr, h1, h3, h10))
+    print("%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f" % \
+      (mrr, raw_mrr, h1, h3, h10))
 
     return (mrr, raw_mrr, h1, h3, h10)
 
@@ -41,7 +42,7 @@ class Scorer(object):
       self.obj[(i, j)] = k
       self.sub[(j, k)] = i
 
-  def compute(self, model, test):
+  def evaluate(self, model, test):
 
     nb_test = len(test.values)
     nrank = np.empty(2*nb_test)
@@ -59,3 +60,16 @@ class Scorer(object):
         res_sub[self.sub[(j,k)]] > res_sub[i])
 
     return Result(nrank, rrank)
+
+  def predict(self, model, test):
+
+    obj = []
+    sub = []
+    for a, (i, j, k) in enumerate(test.indexes):
+      aux = exp.model.objects(i, j)
+      tmp = exp.model.subjects(j, k)
+      obj.append(aux[k])
+      sub.append(tmp[i])
+
+    res = np.column_stack((sub, obj))
+    return res
