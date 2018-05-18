@@ -42,7 +42,7 @@ if __name__ == "__main__":
   if(args.type == 'evaluation'):
 
     data, entities, relations = original(path, args.data)
-    train, test = kcv(data, args.folds)
+    train, test = kfold(data, args.folds)
 
     print("Nb entities: " + str(len(entities)))
     print("Nb relations: " + str(len(relations)))

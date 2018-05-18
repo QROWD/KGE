@@ -1,10 +1,21 @@
 import numpy as np
 
+from rdflib.graph import Graph
 from experiment import *
 
-def read(filename, split="\t"):
+def utf8(lst):
+  return [unicode(elem).encode('utf-8') for elem in lst]
 
-  data = np.genfromtxt(filename, delimiter=split, dtype='string', comments=None)
+def read(file):
+
+  g = Graph()
+  g.parse(file, format="nt")
+
+  data = []
+  for s, p, o in g:
+    data.append(utf8(["" + s,"" + p,"" + o]))
+
+  data = np.array(data)
   entities = (np.unique((data[:,0], data[:,2]))).tolist()
   relations = (np.unique(data[:,1])).tolist()
   return data, entities, relations
@@ -24,7 +35,7 @@ def original(path, file):
   data = byIndex(table, entities, relations)
   return data, entities, relations
 
-def kcv(data, folds=10):
+def kfold(data, folds=10):
 
   idx = np.repeat(range(folds), int(len(data)/folds))
   data = data[0:len(idx),:]

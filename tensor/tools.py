@@ -9,7 +9,7 @@ def L2(M):
   M /=  norm_M[:, None]
   return M
 
-def best(model)
+def best(model):
 
   acc = idx = 0
   for i in range(len(model)):
