@@ -58,21 +58,20 @@ if __name__ == "__main__":
     param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr,
       epoch=args.epoch, bsize=args.bsize, negative=args.negative)
 
-    model = []
+    m = []
     for i in range(args.folds):
       print("Fold " + str(i+1) + ":")
       exp = Experiment(train[i], test[i], entities, relations, param)
-      exp.induce()
-      exp.evaluate()
-      model.append(exp)
+      exp.evaluation()
+      m.append(exp)
 
     with open("model.txt", "wb") as fp:
-      pickle.dump(best(model), fp)
+      pickle.dump(best(m), fp)
 
   else:
 
     with open('model.txt', 'rb') as fp:
-      exp = pickle.load(fp)
+      m = pickle.load(fp)
 
-    test = Triples(byIndex(table, exp.orig_entities, exp.orig_relations))
-    res = exp.prediction(test)
+    test = Triples(byIndex(table, m.entities, m.relations))
+    res = m.prediction(test)
