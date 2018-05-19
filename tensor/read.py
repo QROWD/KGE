@@ -6,7 +6,7 @@ from experiment import *
 def utf8(lst):
   return [unicode(elem).encode('utf-8') for elem in lst]
 
-def read(file):
+def rdf(file):
 
   g = Graph()
   g.parse(file, format="nt")
@@ -16,6 +16,13 @@ def read(file):
     data.append(utf8(["" + s,"" + p,"" + o]))
 
   data = np.array(data)
+  entities = (np.unique((data[:,0], data[:,2]))).tolist()
+  relations = (np.unique(data[:,1])).tolist()
+  return data, entities, relations
+
+def csv(file):
+
+  data = np.genfromtxt(file, delimiter="\t", dtype='|S146')
   entities = (np.unique((data[:,0], data[:,2]))).tolist()
   relations = (np.unique(data[:,1])).tolist()
   return data, entities, relations

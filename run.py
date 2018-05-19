@@ -39,7 +39,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
   np.random.seed(args.rand)
 
-  table, entities, relations = read(path + '/datasets/' + args.data)
+  table, entities, relations = csv(path + '/datasets/' + args.data)
 
   print("Nb entities: " + str(len(entities)))
   print("Nb relations: " + str(len(relations)))

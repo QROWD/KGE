@@ -9,13 +9,22 @@ class Scorer(object):
     self.obj = {}
     self.sub = {}
 
-    for i, j, k in train.indexes:
-      self.obj[(i, j)] = k
-      self.sub[(j, k)] = i
+    self.update(train.indexes)
+    self.update(test.indexes)
 
-    for i, j, k in test.indexes:
-      self.obj[(i, j)] = k
-      self.sub[(j, k)] = i
+  def update(self, triples):
+
+    for i, j, k in triples:
+
+      if (i, j) not in self.obj:
+        self.obj[(i, j)] = [k]
+      elif k not in self.obj[(i, j)]:
+        self.obj[(i, j)].append(k)
+
+      if (j, k) not in self.sub:
+        self.sub[(j, k)] = [i]
+      elif i not in self.sub[(j, k)]:
+        self.sub[(j, k)].append(i)
 
   def evaluation(self, model, test):
 

@@ -1,4 +1,3 @@
-import sys, os
 import numpy as np
 
 def randn(*args):
