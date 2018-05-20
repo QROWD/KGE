@@ -16,18 +16,18 @@ if __name__ == "__main__":
     help='Evaluate or predict the model: {evaluation, prediction}')
   parser.add_argument('--model', metavar='', 
     help='model to run: {Complex, CP, RESCAL, DistMult, TransE}')
-  parser.add_argument('--lmbda', type=float, default=0.1, metavar='', 
+  parser.add_argument('--lmbda', type=float, default=0.01, metavar='', 
     help='value of lambda  (default: 0.1)')
   parser.add_argument('--data', metavar='', help='dataset to be used')
-  parser.add_argument('--k', type=int, default=50, metavar='', 
+  parser.add_argument('--k', type=int, default=150, metavar='', 
     help='embedding size (default: 50)')
   parser.add_argument('--lr', type=float, default=0.5, metavar='', 
     help='Learning rate (default: 0.5)')
   parser.add_argument('--epoch', type=int, default=1000, metavar='', 
     help='Number of epochs (default: 1000)')
-  parser.add_argument('--bsize', type=int, default=500, metavar='', 
+  parser.add_argument('--bsize', type=int, default=1000, metavar='', 
     help='Number of examples in the batch sample (default: 500)')
-  parser.add_argument('--negative', type=int, default=10, metavar='', 
+  parser.add_argument('--negative', type=int, default=1, metavar='', 
     help='Number of negative examples generated (default: 10)')
   parser.add_argument('--folds', type=int, default=10, metavar='', 
     help='Number of k-fold cross validation (default: 10)')
@@ -45,6 +45,7 @@ if __name__ == "__main__":
   print("Nb relations: " + str(len(relations)))
   print("Nb triples: " + str(len(table)))
   print("Technique: " + str(args.model))
+  print("Embedding size: " + str(args.k))
   print("Learning rate: " + str(args.lr))
   print("Max epochs: " + str(args.epoch))
   print("Generated negatives ratio: " + str(args.negative))
