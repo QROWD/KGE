@@ -7,6 +7,8 @@ from evaluation import *
 from tools import *
 
 theano.config.floatX = 'float32'
+theano.config.mode = 'FAST_RUN'
+theano.config.exception_verbosity = 'high'
 
 class Model(object):
 
@@ -24,7 +26,7 @@ class Model(object):
     self.cols = T.lvector('cols')
     self.tubes = T.lvector('tubes') 
 
-    self.n, self.m, self.l, self.k = (0, 0, 0, 0)
+    self.n, self.m, self.l, self.k = 0, 0, 0, 0
 
   def set_dims(self, train, param):
     self.n = max(train.indexes[:,0]) + 1
@@ -40,21 +42,30 @@ class Model(object):
 
   def batch(self, train, param):
 
-    batch = Batch(train, entities=self.n, bsize=param.bsize, 
+    train = Batch(train, entities=self.n, bsize=param.bsize,
       neg_ratio=param.neg_ratio)
     inputs = [self.ys, self.rows, self.cols, self.tubes]
-    return batch, inputs
+    return train, inputs
 
-  def allocate(self):
+  def start(self):
     params = self.tensors()
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
+  def restart(self):
+    params = self.tensors()
+    for name, val in params.items():
+      getattr(self, name).set_value(val, borrow=True)
+
   def setup(self, train, param):
 
-    self.allocate()
-    self.lossfun()
-    self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
+    if self.loss_opt is None:
+      self.start()
+      self.lossfun()
+      self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
+    else:
+      self.restart()
+
     self.loss_opt = self.loss + param.lmbda * self.regul
 
   def fit(self, train, entities, relations, param):
@@ -68,20 +79,17 @@ class Model(object):
 
     vals = downhill.Dataset(vals, name='train')
 
-    it = 1
-    for _ in opt.iterate(vals, None,
-      max_updates=param.epoch,
-      validate_every=9999,
-      patience=9999,
-      max_gradient_norm=1,
+    it = 0
+    for _ in opt.iterate(vals, None, max_updates=param.epoch,
+      validate_every=10, patience=5, max_gradient_norm=1, 
       learning_rate=param.lr):
 
       it += 1
       if it >= param.epoch:
         break
 
-  def predict(self, test_idxs):
-    return self.pred_compiled(*self.pred_args(test_idxs))
+  def predict(self, test):
+    return self.pred_compiled(*self.pred_args(test))
 
   def tensors(self):
     pass
@@ -278,9 +286,7 @@ class TransE(Model):
 
     self.loss = T.sqr(self.ys - self.pred).mean()
 
-    self.regul = T.sqr(self.e[self.rows,:]).mean() \
-      + T.sqr(self.r[self.cols,:]).mean() \
-      + T.sqr(self.e[self.tubes,:]).mean()
+    self.regul = 0
 
   def objects(self, i, j):
     e = self.e.get_value(borrow=True)
