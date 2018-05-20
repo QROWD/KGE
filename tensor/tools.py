@@ -19,13 +19,13 @@ def best(model):
 
   return model[idx]
 
-def measures(ranks):
+def measures(rank):
 
-  mrr = np.mean(1.0 / ranks)
+  mrr = np.mean(1.0 / rank)
 
-  h1  = (np.sum(ranks <= 1))  / float(len(ranks))
-  h3  = (np.sum(ranks <= 3))  / float(len(ranks))
-  h10 = (np.sum(ranks <= 10)) / float(len(ranks))
+  h1  = (np.sum(rank <= 1))  / float(len(rank))
+  h3  = (np.sum(rank <= 3))  / float(len(rank))
+  h10 = (np.sum(rank <= 10)) / float(len(rank))
 
   print("MRR\tH@1\tH@3\tH@10")
   print("%0.3f\t%0.3f\t%0.3f\t%0.3f" % \
