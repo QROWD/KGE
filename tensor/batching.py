@@ -6,7 +6,7 @@ class Batch(object):
     self.positive = positive
     self.bsize = bsize
     self.entities = entities
-    self.neg_ratio = neg_ratio
+    self.neg_ratio = int(neg_ratio)
     self.idx = 0
 
     self.new_triples_indexes = np.empty((self.bsize * (self.neg_ratio + 1) , 3)).astype(np.int64)
