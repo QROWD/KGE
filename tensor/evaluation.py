@@ -12,9 +12,9 @@ class Scorer(object):
     self.update(train.indexes)
     self.update(test.indexes)
 
-  def update(self, triples):
+  def update(self, data):
 
-    for i, j, k in triples:
+    for i, j, k in data:
 
       if (i, j) not in self.obj:
         self.obj[(i, j)] = [k]
@@ -27,30 +27,37 @@ class Scorer(object):
         self.sub[(j, k)].append(i)
 
   def evaluation(self, model, test):
+    pred = model.predict(test.indexes)
+    return np.concatenate((self.head(model, test), self.tail(model, test)))
 
-    nb_test = len(test.values)
-    nrank = np.empty(2*nb_test)
-    rrank = np.empty(2*nb_test)
+  def head(self, model, test):
 
+    rank = np.empty(len(test.values))
     for a, (i, j, k) in enumerate(test.indexes):
 
-      res_obj = model.objects(i, j)
-      rrank[a] = 1 + np.sum(res_obj > res_obj[k])
-      nrank[a] = rrank[a] - np.sum(res_obj[self.obj[(i,j)]] > res_obj[k])
+      sub = model.subjects(j, k)
+      aux = 1 + np.sum(sub > sub[i])
+      rank[a] = aux - np.sum(sub[self.sub[(j,k)]] > sub[i])
 
-      res_sub = model.subjects(j, k)
-      rrank[nb_test + a] = 1 + np.sum(res_sub > res_sub[i])
-      nrank[nb_test + a] = rrank[nb_test + a] - np.sum(
-        res_sub[self.sub[(j,k)]] > res_sub[i])
+    return rank
 
-    return nrank
+  def tail(self, model, test):
+
+    rank = np.empty(len(test.values))
+    for a, (i, j, k) in enumerate(test.indexes):
+
+      obj = model.objects(i, j)
+      aux = 1 + np.sum(obj > obj[k])
+      rank[a] = aux - np.sum(obj[self.obj[(i, j)]] > obj[k])
+
+    return rank
 
   def prediction(self, model, test):
 
-    aux = []
+    aux = np.empty(len(test.values))
     for a, (i, j, k) in enumerate(test.indexes):
-      obj = model.objects(i, j)
       sub = model.subjects(j, k)
-      aux.append(obj[k]*sub[i])
+      obj = model.objects(i, j)
+      aux[a] = sub[i]*obj[k]
 
     return aux
