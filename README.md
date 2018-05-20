@@ -43,3 +43,9 @@ To submit bugs and feature requests, report at [project issues](https://github.c
 
 ## References
 
+[1] Maximilian Nickel, Kevin Murphy, Volker Tresp and Evgeniy Gabrilovich. (2016). A review of relational machine learning for knowledge graphs. Proceedings of the IEEE, 104(1):11-33.
+
+[2] Théo Trouillon, Johannes Welbl, Sebastian Riedel, Eric Gaussier and Guillaume Bouchard. (2016). Complex embeddings for simple link prediction. In International Conference on Machine Learning (ICML), 48:2071-2080.
+
+[3] Theano Development Team. (2017). Theano: A Python framework for fast computation of mathematical expressions.
+
