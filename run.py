@@ -37,21 +37,27 @@ if __name__ == "__main__":
   path = os.path.dirname(os.path.realpath(os.path.basename(__file__)))
 
   args = parser.parse_args()
+
+  _, ext = os.path.splitext(args.data)
   np.random.seed(args.rand)
 
-  table, entities, relations = rdf(path + '/datasets/' + args.data)
+  if(ext == ".nt"):
+    table, entities, relations = rdf(path + '/datasets/' + args.data)
+  else:
+    table, entities, relations = csv(path + '/datasets/' + args.data)
 
   print("Nb entities: " + str(len(entities)))
   print("Nb relations: " + str(len(relations)))
   print("Nb triples: " + str(len(table)))
-  print("Technique: " + str(args.model))
-  print("Embedding size: " + str(args.k))
-  print("Learning rate: " + str(args.lr))
-  print("Max epochs: " + str(args.epoch))
-  print("Generated negatives ratio: " + str(args.negative))
-  print("Batch size: " + str(args.bsize))
 
   if(args.type == 'evaluation'):
+
+    print("Technique: " + str(args.model))
+    print("Embedding size: " + str(args.k))
+    print("Learning rate: " + str(args.lr))
+    print("Number of Epochs: " + str(args.epoch))
+    print("Negatives ratio: " + str(args.negative))
+    print("Batch size: " + str(args.bsize))
 
     data = byIndex(table, entities, relations)
     train, test = kfold(data, args.folds)
@@ -74,5 +80,13 @@ if __name__ == "__main__":
     with open('model.txt', 'rb') as fp:
       m = pickle.load(fp)
 
+    print("Technique: " + str(m.param.model))
+    print("Embedding size: " + str(m.param.k))
+    print("Learning rate: " + str(m.param.lr))
+    print("Number of Epochs: " + str(m.param.epoch))
+    print("Negatives ratio: " + str(m.param.neg_ratio))
+    print("Batch size: " + str(m.param.bsize))
+
     test = Triples(byIndex(table, m.entities, m.relations))
     res = m.prediction(test)
+    np.savetxt("out.csv", res, delimiter=",")
