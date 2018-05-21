@@ -2,9 +2,9 @@
 
 The Knowledge Graph Embedding (KGE) repository is a implementation of the state of the art techniques related to Statistical Relational Learning (SRL) to solve Link Prediction problems. These techniques map the structure of large knowledge graphs on models able to predict missing relationships in new triples [1-2]. The techniques implemented in this code include TransE,  DistMult, RESCAL and ComplEx.
 
-## Installation
+## Technical requirements
 
-The code depends on rdflib, downhill and theano [3] packages. Install it, along with other dependencies with:
+The system was develop in python 2.7. The code depends on rdflib, downhill and theano [3] packages. Install it, along with other dependencies with:
 
 ```
 pip install rdflib downhill theano
