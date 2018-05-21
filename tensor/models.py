@@ -265,6 +265,7 @@ class DistMult(Model):
 
 class TransE(Model):
 
+
   def __init__(self):
     super(TransE, self).__init__()
     self.name = self.__class__.__name__
@@ -281,7 +282,7 @@ class TransE(Model):
 
     self.e.set_value(L2(self.e.get_value(borrow=True)), borrow=True)
 
-    self.pred = - T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
+    self.pred = 1 + T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
       self.r[self.cols,:] - self.e[self.tubes,:]), 1))
 
     self.loss = T.sqr(self.ys - self.pred).mean()
