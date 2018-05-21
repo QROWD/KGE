@@ -34,9 +34,9 @@ The output is the main information about the dataset, the stochastic gradient de
 The best model generated after the cross-validation execution will be exported in the main folder with the name `model.txt`. To evaluate a new data, you should call the prediction function with the test data:
 
 ```
-python run.py prediction --data bicycleparking
+python run.py prediction --data wn18k.txt
 ```
-The output is a table called out.csv with the associated probability of each triple.
+The output is a table called `out.csv` with the associated probability of each triple.
 
 ## Add more data
 
