@@ -51,13 +51,3 @@ class Scorer(object):
       rank[a] = aux - np.sum(obj[self.obj[(i, j)]] > obj[k])
 
     return rank
-
-  def prediction(self, model, test):
-
-    aux = np.empty(len(test.values))
-    for a, (i, j, k) in enumerate(test.indexes):
-      sub = model.subjects(j, k)
-      obj = model.objects(i, j)
-      aux[a] = sub[i]*obj[k]
-
-    return aux
