@@ -36,5 +36,4 @@ class Batch(object):
     train = [values, indexes[:,0], indexes[:,1], 
       indexes[:,2]]
 
-    print(len(values))
     return train
