@@ -1,46 +1,40 @@
-from tools import *
+import numpy as np
 
 class Batch(object):
 
-  def __init__(self, positive, entities, bsize=100, neg_ratio=10):
-    self.positive = positive
+  def __init__(self, data, entities, bsize=100, nsize=10):
+    self.data = data
     self.bsize = bsize
     self.entities = entities
-    self.neg_ratio = int(neg_ratio)
-    self.idx = 0
+    self.nsize = int(nsize)
 
-    self.new_triples_indexes = np.empty((self.bsize * (self.neg_ratio + 1) , 3)).astype(np.int64)
-    self.new_triples_values = np.empty((self.bsize * (self.neg_ratio + 1 ))).astype(np.float32)
+    idx = np.random.randint(0, len(self.data.values), self.bsize)
+    self.data.indexes = self.data.indexes[idx,:]
+    self.data.values = self.data.values[idx]
 
   def __call__(self):
-    idxs = np.random.randint(0,len(self.positive.values),self.bsize)
-    self.new_triples_indexes[:self.bsize,:] = self.positive.indexes[idxs,:]
-    self.new_triples_values[:self.bsize] = self.positive.values[idxs]
 
-    last_idx = self.bsize
+    indexes = []
+    values = []
 
-    #Pre-sample everything, faster
-    rdm_entities = np.random.randint(0, self.entities, last_idx * self.neg_ratio)
-    rdm_choices = np.random.random(last_idx * self.neg_ratio)
-    #Pre copying everyting
-    self.new_triples_indexes[last_idx:(last_idx*(self.neg_ratio+1)),:] = np.tile(self.new_triples_indexes[:last_idx,:],(self.neg_ratio,1))
-    self.new_triples_values[last_idx:(last_idx*(self.neg_ratio+1))] = np.tile(self.new_triples_values[:last_idx], self.neg_ratio)
-
-    for i in range(last_idx):
-      for j in range(self.neg_ratio):
-        cur_idx = i* self.neg_ratio + j
-        #Sample a random subject or object 
-        if rdm_choices[cur_idx] < 0.5:
-          self.new_triples_indexes[last_idx + cur_idx,0] = rdm_entities[cur_idx]
+    for i in range(self.bsize):
+      for j in range(self.nsize):
+        aux = self.data.indexes[i]
+        if np.random.random_sample() < 0.5:
+          aux[0] = np.random.randint(0, self.entities, 1)[0]
         else:
-          self.new_triples_indexes[last_idx + cur_idx,2] = rdm_entities[cur_idx]
+          aux[2] = np.random.randint(0, self.entities, 1)[0]
+        indexes.append(aux)
+        values.append(-1)
 
-        self.new_triples_values[last_idx + cur_idx] = -1
+    indexes = np.array(indexes).astype(np.int64)
+    values = np.array(values).astype(np.float32)
 
-    last_idx += cur_idx + 1
+    indexes = np.concatenate((indexes, self.data.indexes))
+    values = np.concatenate((values, self.data.values))
 
-    train = [self.new_triples_values[:last_idx], self.new_triples_indexes[:last_idx,0], self.new_triples_indexes[:last_idx,1], self.new_triples_indexes[:last_idx,2]]
+    train = [values, indexes[:,0], indexes[:,1], 
+      indexes[:,2]]
 
-
+    print(len(values))
     return train
-
