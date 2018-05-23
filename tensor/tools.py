@@ -43,7 +43,7 @@ class Triples(object):
 class Parameters(object):
 
   def __init__(self, model='Complex', lmbda=0.1, k=100, lr=0.5, epoch=1000, 
-    bsize=500, negative=10, sgd='adagrad'):
+    bsize=500, nsize=10, sgd='adagrad'):
 
     self.model = model
     self.lmbda = lmbda
@@ -51,6 +51,6 @@ class Parameters(object):
     self.lr = lr
     self.epoch = epoch
     self.bsize = bsize
-    self.neg_ratio = negative
+    self.nsize = nsize
     self.sgd = sgd
 

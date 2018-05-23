@@ -26,7 +26,7 @@ if __name__ == "__main__":
     help='Number of epochs (default: 1000)')
   parser.add_argument('--bsize', type=int, default=1000, metavar='', 
     help='Number of examples in the batch sample (default: 500)')
-  parser.add_argument('--negative', type=int, default=1, metavar='', 
+  parser.add_argument('--nsize', type=int, default=1, metavar='', 
     help='Number of negative examples generated (default: 10)')
   parser.add_argument('--folds', type=int, default=10, metavar='', 
     help='Number of k-fold cross validation (default: 10)')
@@ -52,14 +52,14 @@ if __name__ == "__main__":
     print("Embedding size: " + str(args.k))
     print("Learning rate: " + str(args.lr))
     print("Number of Epochs: " + str(args.epoch))
-    print("Negatives ratio: " + str(args.negative))
+    print("Negatives ratio: " + str(args.nsize))
     print("Batch size: " + str(args.bsize))
 
     data = byIndex(table, entities, relations)
     train, test = kfold(data, args.folds)
 
     param = Parameters(model=args.model, lmbda=args.lmbda, k=args.k, lr=args.lr,
-      epoch=args.epoch, bsize=args.bsize, negative=args.negative)
+      epoch=args.epoch, bsize=args.bsize, nsize=args.nsize)
 
     m = []
     for i in range(args.folds):
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     print("Embedding size: " + str(m.param.k))
     print("Learning rate: " + str(m.param.lr))
     print("Number of Epochs: " + str(m.param.epoch))
-    print("Negatives ratio: " + str(m.param.neg_ratio))
+    print("Negatives ratio: " + str(m.param.nsize))
     print("Batch size: " + str(m.param.bsize))
 
     test = Triples(byIndex(table, m.entities, m.relations))

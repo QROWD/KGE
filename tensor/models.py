@@ -40,8 +40,7 @@ class Model(object):
 
   def batch(self, train, param):
 
-    train = Batch(train, entities=self.n, bsize=param.bsize,
-      neg_ratio=param.neg_ratio)
+    train = Batch(train, entities=self.n, bsize=param.bsize, nsize=param.nsize)
     inputs = [self.ys, self.rows, self.cols, self.tubes]
     return train, inputs
 
