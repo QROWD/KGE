@@ -41,10 +41,7 @@ if __name__ == "__main__":
   _, ext = os.path.splitext(args.data)
   np.random.seed(args.rand)
 
-  if(ext == ".nt"):
-    table, entities, relations = rdf(path + '/datasets/' + args.data)
-  else:
-    table, entities, relations = csv(path + '/datasets/' + args.data)
+  table, entities, relations = read(path + '/datasets/' + args.data)
 
   print("Nb entities: " + str(len(entities)))
   print("Nb relations: " + str(len(relations)))

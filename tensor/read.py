@@ -27,6 +27,12 @@ def csv(file):
   relations = (np.unique(data[:,1])).tolist()
   return data, entities, relations
 
+def read(file):
+
+  if(ext == ".nt"):
+    return rdf(file)
+  return csv(file)
+
 def byIndex(table, entities, relations):
 
   data = dict()
