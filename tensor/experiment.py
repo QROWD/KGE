@@ -24,5 +24,4 @@ class Experiment(object):
     self.result = measures(rank)
 
   def prediction(self, test):
-    res = self.scorer.prediction(self.model, test)
-    return(res)
+    return self.model.predict(test.indexes)
