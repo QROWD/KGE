@@ -1,8 +1,7 @@
+import models
 import numpy as np
 
-import models
 from evaluation import *
-from tools import *
 
 class Experiment(object):
 

@@ -1,9 +1,8 @@
-import sys, os
 import argparse
-import pickle
+import os, pickle
 import tensor
 
-import tensor.tools as tools
+from tensor.experiment import *
 from tensor.read import *
 
 if __name__ == "__main__":
@@ -41,7 +40,7 @@ if __name__ == "__main__":
   _, ext = os.path.splitext(args.data)
   np.random.seed(args.rand)
 
-  table, entities, relations = read(path + '/datasets/' + args.data)
+  table, entities, relations = read(path + '/datasets/' + args.data, ext)
 
   print("Nb entities: " + str(len(entities)))
   print("Nb relations: " + str(len(relations)))
@@ -86,4 +85,4 @@ if __name__ == "__main__":
 
     test = Triples(byIndex(table, m.entities, m.relations))
     res = m.prediction(test)
-    np.savetxt("out.csv", res, delimiter=",")
+    np.savetxt("out.csv", res)

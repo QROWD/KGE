@@ -1,7 +1,7 @@
 import numpy as np
 
 from rdflib.graph import Graph
-from experiment import *
+from tools import *
 
 def utf8(lst):
   return [unicode(elem).encode('utf-8') for elem in lst]
@@ -27,7 +27,7 @@ def csv(file):
   relations = (np.unique(data[:,1])).tolist()
   return data, entities, relations
 
-def read(file):
+def read(file, ext):
 
   if(ext == ".nt"):
     return rdf(file)

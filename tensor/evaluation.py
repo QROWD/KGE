@@ -1,5 +1,3 @@
-import operator
-
 from tools import *
 
 class Scorer(object):

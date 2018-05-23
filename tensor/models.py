@@ -2,13 +2,11 @@ import theano
 import theano.tensor as T
 import downhill
 
-from batching import * 
-from evaluation import *
+from batching import *
 from tools import *
 
 theano.config.floatX = 'float32'
 theano.config.mode = 'FAST_RUN'
-theano.config.exception_verbosity = 'high'
 
 class Model(object):
 
