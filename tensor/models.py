@@ -26,19 +26,13 @@ class Model(object):
 
     self.n, self.m, self.l, self.k = 0, 0, 0, 0
 
-  def set_dims(self, train, param):
-    self.n = max(train.indexes[:,0]) + 1
-    self.m = max(train.indexes[:,1]) + 1
-    self.l = max(train.indexes[:,2]) + 1
-    self.k = param.k
-
   def pred_symb_vars(self):
     return [self.rows, self.cols, self.tubes]
 
   def pred_args(self, test):
     return [test[:,0], test[:,1], test[:,2]]
 
-  def batch(self, train, param):
+  def minibatch(self, train, param):
 
     train = Batch(train, entities=self.n, bsize=param.bsize, nsize=param.nsize)
     inputs = [self.ys, self.rows, self.cols, self.tubes]
@@ -49,20 +43,11 @@ class Model(object):
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
-  def restart(self):
-    params = self.tensors()
-    for name, val in params.items():
-      getattr(self, name).set_value(val, borrow=True)
-
   def setup(self, train, param):
 
-    if self.loss_opt is None:
-      self.start()
-      self.lossfun()
-      self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
-    else:
-      self.restart()
-
+    self.start()
+    self.lossfun()
+    self.pred_compiled = theano.function(self.pred_symb_vars(), self.pred)
     self.loss_opt = self.loss + param.lmbda * self.regul
 
   def fit(self, train, entities, relations, param):
@@ -70,7 +55,7 @@ class Model(object):
     self.n, self.m, self.l, self.k = entities, relations, entities, param.k
     self.setup(train, param)
 
-    vals, symbs = self.batch(train, param)
+    vals, symbs = self.minibatch(train, param)
     opt = downhill.build(param.sgd, loss=self.loss_opt, inputs=symbs, 
       monitor_gradients=True)
 
