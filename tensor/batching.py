@@ -1,37 +1,36 @@
 import numpy as np
-from random import randint
 
 class Batch(object):
 
-  def __init__(self, data, entities, bsize=100, nsize=10):
+  def __init__(self, data, entities, bsize, nsize):
     self.data = data
     self.bsize = bsize
     self.entities = entities
-    self.nsize = int(nsize)
+    self.nsize = nsize
 
-    idx = np.random.randint(0, len(self.data.values), self.bsize)
-    self.data.indexes = self.data.indexes[idx,:]
-    self.data.values = self.data.values[idx]
+    self.indexes = self.data.indexes
+    self.values = self.data.values
 
   def __call__(self):
 
-    indexes = []
-    values = []
+    idx = np.random.randint(0, len(self.data.values), self.bsize)
+    self.indexes = self.data.indexes[idx,:]
+    self.values = self.data.values[idx]
 
-    for i in range(self.bsize):
-      for j in range(self.nsize):
-        aux = (self.data.indexes[i]).tolist()
-        if np.random.random_sample() < 0.5:
-          aux[0] = randint(0, self.entities -1)
-        else:
-          aux[2] = randint(0, self.entities -1)
-        indexes.append(aux)
-        values.append(-1)
+    idx = np.repeat(range(len(self.indexes)), self.nsize)
+    values = np.repeat(-1, len(self.indexes) * self.nsize)
+    indexes = self.indexes[idx,:]
 
-    indexes = np.array(indexes).astype(np.int64)
-    values = np.array(values).astype(np.float32)
+    for i in range(len(indexes)):
+      if np.random.random_sample() < 0.5:
+        indexes[i,0] = np.random.randint(0, self.entities, 1)[0]
+      else:
+        indexes[i,2] = np.random.randint(0, self.entities, 1)[0]
 
-    indexes = np.concatenate((self.data.indexes, indexes))
-    values = np.concatenate((self.data.values, values))
+    self.indexes = np.concatenate((self.indexes, indexes), axis=0)
+    self.values = np.concatenate((self.values, values), axis=0)
 
-    return [values, indexes[:,0], indexes[:,1], indexes[:,2]]
+    self.indexes = self.indexes.astype(np.int64)
+    self.values = self.values.astype(np.float32)
+
+    return [self.values, self.indexes[:,0], self.indexes[:,1], self.indexes[:,2]]
