@@ -12,10 +12,10 @@ pip install rdflib downhill theano
 
 ## Example of use
 
-The simplest way to generate and evaluate the models is calling the `run.py` script. The `model` parameter is the techniques available, the `data` is the name of the dataset to be executed, the `k` is the dimension of the embedding vectors, the `epoch` is the number of epochs to be executed and the `folds` is the number of folds used in the k-fold cross-validation technique. The simplest way to execute the KGE techniques is:
+The simplest way to generate and evaluate the models is calling the `run.py` script. The `model` parameter is the techniques available, the `data` is the full path of the dataset to be executed, the `k` is the dimension of the embedding vectors, the `epoch` is the number of epochs to be executed and the `folds` is the number of folds used in the k-fold cross-validation technique. The simplest way to execute the KGE techniques is:
 
 ```
-python run.py evaluation --model Complex --data wn18k.txt --k 200 --epoch 1000 --folds 5
+python run.py evaluation --model Complex --data /tmp/wn18k.txt --k 200 --epoch 1000 --folds 5
 ```
 
 The code can be executed in the x86 or using GPUs. To execute the code using GPUs you need to add the flag `DEVICE=cuda0` before calling the execution line. Additional parameters can be fitted: `lmbda` is the lambda value, `lr` is the learning rate, `bsize` is the number of examples in the batch, `negative` is the number of negative samples used and `folds` the number of folds in the cross-validation technique. 
@@ -31,10 +31,10 @@ The output is the main information about the dataset, the stochastic gradient de
 0.713	0.619	0.803	0.823
 ```
 
-The best model generated after the cross-validation execution will be exported in the main folder with the name `model.txt`. To evaluate a new data, you should call the prediction function with the test data:
+The best model generated after the cross-validation execution will be exported in the main folder with the name `model.txt`. To evaluate a new data, you should call the prediction function with the full path of the test data:
 
 ```
-python run.py prediction --data wn18k.txt
+python run.py prediction --data /tmp/wn18k.txt
 ```
 The output is a table called `out.csv` with the associated probability of each triple.
 
