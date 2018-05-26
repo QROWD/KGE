@@ -33,14 +33,12 @@ if __name__ == "__main__":
   parser.add_argument('--rand', default=1234, type=int, metavar='',
     help='Set the random seed (default: 1234')
 
-  path = os.path.dirname(os.path.realpath(os.path.basename(__file__)))
-
   args = parser.parse_args()
 
   _, ext = os.path.splitext(args.data)
   np.random.seed(args.rand)
 
-  table, entities, relations = read(path + '/datasets/' + args.data, ext)
+  table, entities, relations = read(args.data, ext)
 
   print("Nb entities: " + str(len(entities)))
   print("Nb relations: " + str(len(relations)))
