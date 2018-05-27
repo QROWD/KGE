@@ -32,8 +32,7 @@ class Scorer(object):
 
     rank = np.empty(len(test.values))
     for a, (i, j, k) in enumerate(test.indexes):
-
-      sub = model.subjects(j, k)
+      sub = model.subject(j, k)
       aux = 1 + np.sum(sub > sub[i])
       rank[a] = aux - np.sum(sub[self.sub[(j,k)]] > sub[i])
 
@@ -43,8 +42,7 @@ class Scorer(object):
 
     rank = np.empty(len(test.values))
     for a, (i, j, k) in enumerate(test.indexes):
-
-      obj = model.objects(i, j)
+      obj = model.object(i, j)
       aux = 1 + np.sum(obj > obj[k])
       rank[a] = aux - np.sum(obj[self.obj[(i, j)]] > obj[k])
 
