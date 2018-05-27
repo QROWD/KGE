@@ -43,7 +43,7 @@ class Model(object):
     for name, val in params.items():
       setattr(self, name, theano.shared(val, name=name))
 
-  def setup(self, train, param):
+  def setup(self, param):
 
     self.start()
     self.lossfun()
@@ -53,16 +53,16 @@ class Model(object):
   def fit(self, train, entities, relations, param):
 
     self.n, self.m, self.l, self.k = entities, relations, entities, param.k
-    self.setup(train, param)
+    self.setup(param)
 
-    vals, symbs = self.minibatch(train, param)
-    opt = downhill.build(param.sgd, loss=self.loss_opt, inputs=symbs, 
+    train, inputs = self.minibatch(train, param)
+    opt = downhill.build(param.sgd, loss=self.loss_opt, inputs=inputs,
       monitor_gradients=True)
 
-    vals = downhill.Dataset(vals, name='train')
+    train = downhill.Dataset(train, name='train')
 
     it = 0
-    for _ in opt.iterate(vals, None, max_updates=param.epoch,
+    for _ in opt.iterate(train, None, max_updates=param.epoch,
       validate_every=10, patience=5, max_gradient_norm=1, 
       learning_rate=param.lr):
 
@@ -262,12 +262,12 @@ class TransE(Model):
 
   def lossfun(self):
 
-    self.e.set_value(L2(self.e.get_value(borrow=True)), borrow=True)
+    #self.e.set_value(L2(self.e.get_value(borrow=True)), borrow=True)
 
-    self.pred = 1 + T.sqrt(T.sum(T.sqr(self.e[self.rows,:] + 
-      self.r[self.cols,:] - self.e[self.tubes,:]), 1))
+    self.pred = T.sum(self.e[self.rows,:] \
+      + self.r[self.cols,:] - self.e[self.tubes,:], 1)
 
-    self.loss = T.sqr(self.ys - self.pred).mean()
+    self.loss = T.maximum(0, 1 + self.ys - self.pred).mean()
 
     self.regul = 0
 
