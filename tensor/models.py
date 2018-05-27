@@ -267,10 +267,10 @@ class TransE(Model):
 
   def lossfun(self):
 
-    self.pred = T.sum(self.e[self.rows,:] \
-      + self.r[self.cols,:] - self.e[self.tubes,:], 1)
+    self.pred = T.sum(T.sqr(self.e[self.rows,:] \
+      + self.r[self.cols,:] - self.e[self.tubes,:]), 1)
 
-    self.loss = T.maximum(0, 1 + self.ys - self.pred).mean()
+    self.loss = T.sqr(self.ys - self.pred).mean()
 
     self.regul = 0
 
