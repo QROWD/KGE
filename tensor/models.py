@@ -98,8 +98,8 @@ class CP(Model):
 
   def lossfun(self):
 
-    self.pred = T.sum(self.u[self.rows,:] * self.v[self.cols,:] * 
-      self.w[self.tubes,:], 1)
+    self.pred = T.sum(self.u[self.rows,:] * self.v[self.cols,:] \
+      * self.w[self.tubes,:], 1)
 
     self.loss = T.sqr(self.ys - self.pred).mean()
 
@@ -191,14 +191,14 @@ class RESCAL(Model):
 
   def lossfun(self):
 
-    self.pred = T.sum(T.sum(self.e[self.rows,:,None] * 
-      self.r[self.cols,:,:], 1) *  self.e[self.tubes,:], 1)
+    self.pred = T.sum(T.sum(self.e[self.rows,:,None] \
+      * self.r[self.cols,:,:], 1) * self.e[self.tubes,:], 1)
 
     self.loss = T.sqr(self.ys - self.pred).mean()
 
     self.regul = T.sqr(self.e[self.rows,:]).mean() \
-            + T.sqr(self.r[self.cols,:,:]).mean() \
-            + T.sqr(self.e[self.tubes,:]).mean()
+      + T.sqr(self.r[self.cols,:,:]).mean() \
+      + T.sqr(self.e[self.tubes,:]).mean()
 
   def objects(self, i, j):
     e = self.e.get_value(borrow=True)
