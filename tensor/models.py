@@ -79,6 +79,12 @@ class Model(object):
   def lossfun(self):
     pass
 
+  def objects(self, i, j):
+    pass
+
+  def subjects(self, j, k):
+    pass
+
 class CP(Model):
 
   def __init__(self):
